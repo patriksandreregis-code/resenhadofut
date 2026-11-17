@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d0b">
+<title>Resenha Chess — Xadrez com identidade de futebol</title>
+<meta name="description" content="Jogue xadrez no Resenha Chess: desafie bots, treine suas jogadas e prepare-se para enfrentar outros torcedores online.">
+<link rel="icon" href="/favicon-32x32.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#080d0b;--panel:#101713;--panel2:#151e17;--line:#29372d;--text:#f4f6f4;--muted:#a6b0a8;--lime:#a8ff3f;--blue:#83b6ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#a8ff3f12,transparent 35%),var(--bg);color:var(--text);font:14px/1.55 Inter,system-ui,sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1180px,calc(100% - 36px));margin:auto}
+header{height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:11px;font-weight:900}.brand img{width:46px;height:50px;object-fit:contain}.brand span{font:italic 900 21px "Barlow Condensed";color:var(--lime)}nav{display:flex;gap:20px;color:var(--muted);font-size:12px;font-weight:700}nav a:hover{color:var(--lime)}
+.hero{padding:34px 0 22px}.eyebrow{color:var(--lime);font-size:10px;font-weight:900;letter-spacing:1.7px;text-transform:uppercase}.hero h1{font:900 clamp(42px,7vw,68px)/.95 "Barlow Condensed";margin:10px 0}.hero h1 span{color:var(--lime)}.hero p{color:var(--muted);max-width:670px;margin:0}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start;padding:12px 0 54px}.panel{background:linear-gradient(145deg,#151f18,#0e1410);border:1px solid var(--line);border-radius:16px;padding:18px}.panel h2{font-size:15px;margin:0 0 14px}.mode{width:100%;text-align:left;background:#0c130e;color:var(--text);border:1px solid #2a392e;border-radius:11px;padding:12px;margin:5px 0;cursor:pointer}.mode strong{display:block;font-size:13px}.mode small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.mode.active{border-color:var(--lime);background:#1a2817}.field{display:block;margin-top:14px}.field span{display:block;color:#aab5ac;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;margin-bottom:6px}.field select{width:100%;padding:11px;background:#0a100c;color:#f4f6f4;border:1px solid #344338;border-radius:9px;font:inherit}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid var(--lime);background:var(--lime);color:#101810;border-radius:9px;padding:10px 13px;font-weight:900;font-size:12px;cursor:pointer}.btn.secondary{background:#111a14;color:var(--text);border-color:#3b4b3e}.btn:disabled{opacity:.4;cursor:not-allowed}.note{font-size:11px;color:var(--muted);line-height:1.6;margin:13px 0 0}.status{font-size:12px;color:var(--lime);font-weight:800;margin:0 0 12px;min-height:20px}
+.gamepanel{padding:18px}.gamehead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.gamehead h2{margin:0;font-size:17px}.clock{font:800 19px ui-monospace,monospace;background:#080d0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px}.match{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}body[data-chess-style="classic"] .match{display:none}.club{display:flex;align-items:center;gap:9px;font-weight:800}.crest{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#24351e;color:var(--lime);font-size:10px;font-weight:900;border:1px solid #486039}.crest img{width:100%;height:100%;object-fit:contain;padding:3px;border-radius:9px;display:block}.crest.has-logo{background:#fff!important;border-color:#fff!important;overflow:hidden}.crest.club-themed:not(.has-logo){background:var(--club-primary);color:var(--club-secondary);border-color:var(--club-secondary)}.club small{display:block;color:var(--muted);font-size:10px;font-weight:600}.arena{padding:clamp(10px,2vw,22px);border-radius:15px;border:1px solid #344338;background:radial-gradient(ellipse at center,#203a20,#101b12 65%,#080d0b);box-shadow:inset 0 0 55px #0008}.board{width:min(100%,650px);aspect-ratio:1;margin:auto;display:grid;grid-template-columns:repeat(8,1fr);border:5px solid #18231a;box-shadow:0 14px 35px #0008;user-select:none}.square{position:relative;display:grid;place-items:center;aspect-ratio:1;cursor:pointer;border:0;padding:0}.square.light{background:#e8dfc9}.square.dark{background:#71916a}.square.selected{box-shadow:inset 0 0 0 4px #f4e04d}.square.hint:after{content:"";position:absolute;width:23%;height:23%;border-radius:50%;background:#1a4f2b99}.square.capture:after{content:"";position:absolute;inset:4px;border:4px solid #1a4f2b99;border-radius:50%}.piece{font-family:"Segoe UI Symbol","DejaVu Sans",serif;font-size:clamp(25px,5.4vw,54px);line-height:1;z-index:1;filter:drop-shadow(0 2px 1px #0005)}.piece.white{color:#fffdf4;text-shadow:1px 1px 1px #222,-1px -1px 1px #222}.piece.black{color:#151a16;text-shadow:0 1px 1px #fff8}.coords{position:absolute;font-size:9px;font-weight:900;opacity:.65;left:3px;top:1px;color:#182018}.moves{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:11px}.moves strong{color:var(--text)}.history{max-height:110px;overflow:auto;margin-top:8px;padding:10px;background:#090f0b;border:1px solid #26352a;border-radius:9px;font:11px/1.7 ui-monospace,monospace;color:#c4cec6}.online{display:none;margin-top:14px;padding:13px;border:1px dashed #43533f;border-radius:10px;color:#bdc9bf;font-size:11px}.online strong{color:var(--lime)}.online input{width:100%;padding:10px 11px;background:#080d0b;color:#f4f6f4;border:1px solid #3b4b3e;border-radius:8px;font:inherit;font-size:12px}.online .field{margin-top:12px}.controls.online-active #onlineControls{display:block}
+.variant-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 2px;padding:12px 14px;background:#0e1510;border:1px solid var(--line);border-radius:13px}
+.variant-picker-label{margin-right:auto;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+.variant-btn{border:1px solid #344338;background:#101812;color:var(--text);padding:10px 15px;border-radius:9px;font:800 12px Inter,sans-serif;cursor:pointer}
+.variant-btn.active{border-color:var(--lime);background:#1a2817;color:var(--lime);box-shadow:0 0 0 1px #a8ff3f22}
+.custom-fields{display:none}.custom-fields.visible{display:block}
+.game-alert{margin:0 0 12px;padding:12px 14px;border:1px solid #d8a83e;background:linear-gradient(100deg,#4a3517,#211b10);border-radius:10px;color:#ffe4a1;font-size:13px;font-weight:900;box-shadow:0 5px 18px #0005}
+.game-alert[hidden]{display:none}.game-alert.info{border-color:#5278a7;background:linear-gradient(100deg,#172d48,#101923);color:#c5ddff}
+.game-alert.success{border-color:#6a9d4c;background:linear-gradient(100deg,#1d3b20,#111d13);color:#caffae}
+.piece{animation:pieceEnter .16s ease-out}@keyframes pieceEnter{from{transform:translateY(-3px) scale(.92);opacity:.72}to{transform:translateY(0) scale(1);opacity:1}}
+.chess-chat{margin-top:14px;border:1px solid #344338;border-radius:12px;overflow:hidden;background:#0b120d}
+.chess-chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#121d15;border-bottom:1px solid #29372d}
+.chess-chat-head strong{font-size:12px;color:var(--lime);letter-spacing:.5px}.chess-chat-head small{font-size:10px;color:var(--muted)}
+.chat-messages{height:180px;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.chat-empty{margin:auto;color:#819087;font-size:11px;text-align:center}
+.chat-message{display:grid;gap:2px;max-width:92%;align-self:flex-start}.chat-message.mine{align-self:flex-end;text-align:right}
+.chat-message-meta{font-size:9px;color:#8f9d92;display:flex;gap:7px;align-items:center}.chat-message.mine .chat-message-meta{justify-content:flex-end}
+.chat-message-meta strong{color:#b8d99e}.chat-message-body{display:inline-block;padding:7px 10px;border-radius:9px;background:#1a281e;color:#e8efe9;font-size:11px;line-height:1.45;overflow-wrap:anywhere;text-align:left}
+.chat-message.mine .chat-message-body{background:#263a20;color:#eaffdc}
+.chat-compose{display:flex;gap:8px;padding:10px;border-top:1px solid #29372d}.chat-compose input{flex:1;min-width:0;padding:10px;background:#080e0a;color:white;border:1px solid #344338;border-radius:8px;font:inherit;font-size:11px}
+.chat-compose button{border:1px solid var(--lime);border-radius:8px;padding:0 14px;background:var(--lime);color:#101810;font-size:11px;font-weight:900;cursor:pointer}.chat-compose button:disabled{opacity:.4;cursor:not-allowed}
+.chat-footnote{padding:0 11px 9px;color:#77857a;font-size:9px}.voice-bar{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid #29372d;background:#101812}.voice-status{font-size:10px;color:#a6b0a8;display:flex;align-items:center;gap:7px}.voice-dot{width:7px;height:7px;border-radius:50%;background:#718075}.voice-dot.on{background:#a8ff3f;box-shadow:0 0 9px #a8ff3f88}.voice-actions{display:flex;gap:6px;flex-wrap:wrap}.voice-actions button{border:1px solid #405342;border-radius:8px;padding:7px 10px;background:#17231a;color:#e8efe9;font-size:10px;font-weight:800;cursor:pointer}.voice-actions button.primary{background:#a8ff3f;color:#101810;border-color:#a8ff3f}.voice-actions button:disabled{opacity:.4;cursor:not-allowed}.voice-note{padding:0 12px 9px;color:#77857a;font-size:9px}@media(max-width:560px){.chat-messages{height:155px}.chat-compose button{padding:0 11px}}
+.piece.team-piece.white{color:var(--team-primary)!important;text-shadow:1px 1px 0 var(--team-secondary),-1px -1px 0 #fff,0 2px 4px #0009;filter:drop-shadow(0 2px 2px #0008)}
+.piece.team-piece.black{color:var(--team-secondary)!important;text-shadow:1px 1px 0 var(--team-primary),-1px -1px 0 #fff,0 2px 4px #0009;filter:drop-shadow(0 2px 2px #0008)}
+.crest.club-themed{background:var(--club-primary)!important;color:var(--club-secondary)!important;border:2px solid var(--club-secondary)!important;border-radius:50% 50% 44% 44%!important;box-shadow:inset 0 0 0 2px #ffffff22,0 2px 8px #0006}
+.arena:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.8;background:radial-gradient(ellipse at 8% 0%,#ffffff38,transparent 24%),radial-gradient(ellipse at 92% 0%,#ffffff30,transparent 25%),linear-gradient(180deg,#ffffff08,transparent 45%);z-index:0}
+.board{position:relative;z-index:1}
+body[data-chess-style="resenha"] .arena{position:relative;isolation:isolate;overflow:hidden;padding:clamp(18px,3vw,34px);border:1px solid #66866a;border-radius:18px;background:radial-gradient(ellipse at 50% 48%,#243c2b 0%,#14231a 58%,#080e0a 100%);box-shadow:inset 0 0 42px #000b,0 14px 35px #0008}
+body[data-chess-style="resenha"] .arena:before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;opacity:.95;background:radial-gradient(ellipse at 8% 12%,#fff8 0 2px,transparent 4px),radial-gradient(ellipse at 92% 12%,#fff8 0 2px,transparent 4px),repeating-linear-gradient(90deg,transparent 0 18px,#d9e7dc0b 19px 21px),repeating-linear-gradient(0deg,#ffffff08 0 3px,transparent 3px 9px),linear-gradient(180deg,#253d2d 0%,#111d15 48%,#253d2d 100%);box-shadow:inset 0 0 0 10px #0a110c,inset 0 0 0 12px #62796855}
+body[data-chess-style="resenha"] .arena:after{content:"";position:absolute;inset:9px;pointer-events:none;z-index:0;opacity:.55;border:1px solid #dce9dd38;border-radius:11px;background:linear-gradient(90deg,#dce9dd08,transparent 18%,transparent 82%,#dce9dd08)}
+body[data-chess-style="resenha"] .board{position:relative;z-index:1;border:5px solid #0b160e;outline:1px solid #b5d0b866;box-shadow:0 12px 32px #000c,0 0 0 5px #182b1d}
+body[data-chess-style="resenha"] .square.light{background-color:#78a95d;background-image:repeating-linear-gradient(115deg,#ffffff09 0 1px,transparent 1px 4px),linear-gradient(135deg,#8cbd70,#6f9d54)}
+body[data-chess-style="resenha"] .square.dark{background-color:#397344;background-image:repeating-linear-gradient(115deg,#0000000b 0 1px,transparent 1px 4px),linear-gradient(135deg,#477f4b,#2e6339)}
+body[data-chess-style="resenha"] .square .coords{color:#f4ffe9;text-shadow:0 1px 2px #102b14;opacity:.9}
+body[data-chess-style="resenha"] .square.selected{box-shadow:inset 0 0 0 4px #f3e66c}
+body[data-chess-style="resenha"] .square.hint:after{background:#eaffd5a8}
+body[data-chess-style="resenha"] .square.capture:after{border-color:#eaffd5bb}
+body[data-chess-style="resenha"] .board:before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.16;background:linear-gradient(#f4fff0,#f4fff0) center/1px 100% no-repeat,radial-gradient(circle at center,transparent 0 12%,#f4fff0 12.2% 12.5%,transparent 12.7%),linear-gradient(#f4fff0,#f4fff0) center/100% 1px no-repeat}
+body[data-chess-style="resenha"] .square{z-index:0}
+body[data-chess-style="resenha"] .piece{position:relative;z-index:2}
+body[data-chess-style="resenha"][data-stadium="maracana"] .arena:before{background-color:#183a25;background-image:radial-gradient(ellipse at 50% 0%,#c5e7c733,transparent 45%),repeating-linear-gradient(90deg,#ffffff0b 0 3px,transparent 3px 15px),linear-gradient(180deg,#315c3d,#102016)}
+@media(max-width:560px){body[data-chess-style="resenha"] .arena{padding:13px 7px}}
+.footer{border-top:1px solid var(--line);padding:20px 0 30px;color:#7e8b81;font-size:11px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{order:2}.gamepanel{order:1}}@media(max-width:560px){.wrap{width:calc(100% - 22px)}header{height:65px}.brand img{width:38px}nav{gap:10px;font-size:10px}.hero{padding-top:25px}.gamepanel{padding:10px}.arena{padding:5px}.board{border-width:3px}.piece{font-size:clamp(23px,8vw,42px)}.panel{padding:14px}}
+.site-header{width:min(1120px,calc(100% - 40px));height:82px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #26332b;position:relative;z-index:30}
+.site-brand{display:flex;align-items:center;gap:12px;color:var(--text,#f4f6f4);text-decoration:none;font-weight:900;letter-spacing:-.6px;flex-shrink:0}
+.site-brand-icon{width:52px;height:56px;display:block;object-fit:contain}
+.site-brand-name{font-size:17px;line-height:1.02}.site-brand-name>span{display:block;color:var(--lime,#a8ff3f);font:italic 900 21px "Barlow Condensed",Impact,sans-serif;letter-spacing:.3px}
+.site-nav{display:flex;align-items:center;gap:clamp(10px,1.35vw,18px);font-size:11px;font-weight:700;color:var(--muted,#a6b0a8)}
+.site-nav>a{color:inherit;text-decoration:none;white-space:nowrap}.site-nav>a:hover,.nav-dropdown-toggle:hover{color:var(--lime,#a8ff3f)}
+.site-nav .home-cta{background:var(--lime,#a8ff3f);color:#101810;padding:10px 12px;border-radius:9px}
+.nav-dropdown{position:relative}.nav-dropdown-toggle{border:0;background:none;color:inherit;font:inherit;padding:12px 0;cursor:pointer;white-space:nowrap}.nav-dropdown-toggle span{color:var(--lime,#a8ff3f);margin-left:4px}
+.nav-dropdown-menu{display:none;position:absolute;z-index:40;top:100%;left:-14px;min-width:220px;padding:8px;background:#111a14;border:1px solid #354633;border-radius:12px;box-shadow:0 18px 40px #0009}
+.nav-dropdown:hover .nav-dropdown-menu,.nav-dropdown:focus-within .nav-dropdown-menu,.nav-dropdown.open .nav-dropdown-menu{display:grid}
+.nav-dropdown-menu a{padding:10px 11px;border-radius:7px;color:#dce5dd;text-decoration:none}.nav-dropdown-menu a:hover{background:#24351e;color:#a8ff3f}.nav-dropdown-menu small{font-size:9px;color:#a8ff3f;margin-left:5px;font-weight:900}
+@media(max-width:760px){.site-header{width:calc(100% - 22px);height:70px}.site-brand-icon{width:44px;height:48px}.site-brand-name{font-size:15px}.site-nav{gap:10px}.site-nav>a:not(.home-cta){display:none}.nav-dropdown-toggle{font-size:11px}.nav-dropdown-menu{left:auto;right:-68px;min-width:210px}}
+.chess-account-prompt{max-width:1180px;margin:0 auto 22px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid rgba(168,255,63,.3);border-radius:16px;background:linear-gradient(110deg,rgba(168,255,63,.10),rgba(22,34,25,.82));box-shadow:0 12px 30px rgba(0,0,0,.16)}.chess-account-copy strong{display:block;color:var(--lime,#a8ff3f);font-size:15px;font-weight:900}.chess-account-copy p{margin:5px 0 0;color:#d0d9d0;font-size:13px;line-height:1.5}.chess-account-link{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:10px;background:var(--lime,#a8ff3f);color:#142014;font-size:13px;font-weight:900;text-decoration:none}.chess-account-link:hover{filter:brightness(1.08);transform:translateY(-1px)}@media(max-width:650px){.chess-account-prompt{align-items:flex-start;flex-direction:column;padding:15px}.chess-account-link{width:100%;justify-content:center}}
+.room-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.room-choice{min-height:82px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;text-align:left;padding:11px;border:1px solid var(--line,#344238);border-radius:9px;background:#0c130e;color:var(--text,#f4f6f4);font:inherit;font-weight:900;cursor:pointer}.room-choice small{font-size:10px;line-height:1.45;color:var(--muted,#9ca99f);font-weight:600}.room-join-box{display:grid;gap:8px;margin:10px 0}.room-back{border:0;background:transparent;color:var(--muted,#9ca99f);text-align:left;padding:5px 0;cursor:pointer;font:inherit;font-size:11px}@media(max-width:480px){.room-choices{grid-template-columns:1fr}.room-choice{min-height:68px}}
+</style>
+</head>
+<body><div class="wrap">
+<header class="site-header">
+<a class="site-brand" href="/" aria-label="Resenha do Fut - início"><img class="site-brand-icon" src="/logo.png" alt="Logo Resenha do Fut"><span class="site-brand-name">RESENHA<br><span>DO FUT.</span></span></a>
+<nav class="site-nav" aria-label="Navegação principal">
+<a href="/#jogos">Jogos</a>
+<div class="nav-dropdown"><button class="nav-dropdown-toggle" type="button" aria-expanded="false">Sobre os jogos <span aria-hidden="true">⌄</span></button><div class="nav-dropdown-menu">
+<a href="/jogos/leilao-de-futebol">Leilão de Futebol</a><a href="/jogos/dado-da-copa">Dado da Copa</a><a href="/jogos/resenha-ball">Resenha Ball</a><a href="/jogos/resenha-x">Resenha Chess</a><a href="/jogos/resenha-scout">Resenha Scout</a><a href="/jogos/resenha-manager">Resenha Manager <small>EM BREVE</small></a>
+</div></div>
+<a href="/plataforma">A plataforma</a><a href="/sobre">Sobre</a>
+<div class="nav-dropdown"><button class="nav-dropdown-toggle" type="button" aria-expanded="false">Ranking <span aria-hidden="true">⌄</span></button><div class="nav-dropdown-menu"><a href="/ranking">Ver ranking</a><a href="/ranking/como-funciona">Como funciona</a></div></div>
+<a class="home-cta" data-account-link href="/conta">Criar conta</a>
+</nav></header>
+<section class="hero"><div class="eyebrow">♟ Novo jogo · Futebol + estratégia</div><h1>RESENHA <span>CHESS</span></h1><p>O tabuleiro é seu campo. Escolha seu clube, prepare sua estratégia e entre para a resenha. Comece treinando ou desafie a inteligência artificial.</p></section>
+<section class="chess-account-prompt" aria-label="Cadastro e pontuação">
+<div class="chess-account-copy"><strong>Jogue grátis, sem cadastro!</strong><p>Entre na sua conta para ganhar XP, subir de nível e ajudar seu clube a conquistar posições no ranking do Resenha Chess.</p></div>
+<a class="chess-account-link" href="/conta">Entrar ou criar conta <span aria-hidden="true">↗</span></a>
+</section>
+<section class="variant-picker" aria-label="Escolha a versão do xadrez"><span class="variant-picker-label">Escolha sua experiência</span><button type="button" class="variant-btn active" data-chess-style="classic" aria-pressed="true">♟ Chess Clássico</button><button type="button" class="variant-btn" data-chess-style="resenha" aria-pressed="false">⚽ Resenha Chess</button></section>
+<main class="layout">
+<aside class="panel controls"><h2>Escolha sua partida</h2>
+<button class="mode active" data-mode="bot"><strong>♟ Contra o bot</strong><small>Enfrente a inteligência artificial em três níveis.</small></button>
+<button class="mode" data-mode="training"><strong>🎓 Treinamento</strong><small>Aprenda os movimentos e pratique com orientações.</small></button>
+<button class="mode" data-mode="online"><strong>⚔️ Online — dois jogadores</strong><small>Salas privadas e partidas com outros torcedores.</small></button>
+<div class="custom-fields" id="customFields"><label class="field"><span>Escolha seu time</span><select id="club"><optgroup label="Brasil"><option selected>Flamengo</option><option>Corinthians</option><option>Palmeiras</option><option>São Paulo</option><option>Santos</option><option>Vasco</option><option>Grêmio</option><option>Internacional</option><option>Cruzeiro</option><option>Atlético-MG</option></optgroup><optgroup label="Europa"><option>Real Madrid</option><option>Barcelona</option><option>Manchester City</option><option>Liverpool</option><option>Manchester United</option><option>Bayern de Munique</option><option>PSG</option><option>Arsenal</option><option>Chelsea</option><option>Juventus</option></optgroup></select></label></div>
+<label class="field" id="difficultyField"><span>Dificuldade do bot</span><select id="difficulty"><option value="easy">Fácil</option><option value="medium" selected>Médio</option><option value="hard">Difícil</option></select></label>
+<div class="actions"><button class="btn" id="newGame">Nova partida</button><button class="btn secondary" id="undo">Desfazer</button></div>
+<p class="note" id="modeInfo">Você joga com as peças claras. O bot começa com as peças escuras. Selecione uma peça e depois a casa de destino.</p>
+<div class="online" id="onlineControls">
+<strong>⚔️ Salas multiplayer</strong>
+<label class="field"><span>Seu nome</span><input id="playerName" maxlength="16" value="Jogador" autocomplete="nickname" placeholder="Como deseja aparecer?"></label>
+<p class="note">Escolha como deseja jogar online:</p>
+<div class="room-choices" id="roomChoices"><button class="room-choice" type="button" id="chooseCreateRoom"><strong>＋ Criar sala</strong><small>Comece uma nova partida. O código será gerado automaticamente.</small></button><button class="room-choice" type="button" id="chooseJoinRoom"><strong>↪ Entrar em sala</strong><small>Já recebeu um código? Informe para entrar na partida.</small></button></div>
+<div class="room-join-box" id="joinRoomBox" hidden><label class="field"><span>Código da sala existente</span><input id="roomCodeInput" maxlength="6" autocomplete="off" placeholder="Digite o código recebido" style="text-transform:uppercase;letter-spacing:2px;font-weight:900"></label><div class="actions"><button class="btn secondary" id="joinRoom">Entrar na sala</button><button class="btn secondary" type="button" id="backRoomChoices">← Voltar</button></div></div>
+<div class="actions"><button class="btn secondary" id="copyRoom" disabled>Copiar código</button></div>
+<div id="onlineStatus" class="note" aria-live="polite">Crie uma sala e envie o código ao seu adversário, ou entre usando um código recebido.</div>
+<div class="actions"><button class="btn secondary" id="offerDraw" disabled>Oferecer empate</button><button class="btn secondary" id="resign" disabled>Desistir</button></div><div class="actions"><button class="btn secondary" id="rematch" disabled>Revanche</button><button class="btn secondary" id="leaveRoom" disabled>Sair da sala</button></div>
+<p class="note">As jogadas são conferidas pelo servidor. A sala aceita dois jogadores; se alguém cair, terá até 60 segundos para reconectar.</p>
+</div>
+</aside>
+<section class="panel gamepanel"><div class="gamehead"><h2 id="boardTitle">Chess Clássico</h2><div class="clock" id="clock">∞</div></div>
+<div class="match"><div class="club"><div class="crest" id="yourCrest">FLA</div><div><span id="yourClub">Flamengo</span><small id="yourMeta">Você · Brancas</small></div></div><span style="color:#7e8b81;font-weight:900">VS</span><div class="club"><div class="crest" id="opponentCrest" style="background:#182438;color:#9fc6ff;border-color:#365477">BOT</div><div><span id="opponentClub">Resenha Bot</span><small id="opponentMeta">Médio · Pretas</small></div></div></div>
+<div class="game-alert" id="gameNotice" role="status" aria-live="polite" hidden></div><div class="status" id="status">Sua vez — brancas.</div>
+<div class="arena"><div class="board" id="board" role="grid" aria-label="Tabuleiro de xadrez"></div></div>
+<div class="moves"><strong>Últimas jogadas:</strong><span id="lastMoves">A partida ainda não começou.</span></div><div class="history" id="history">Movimentos aparecerão aqui.</div>
+<div class="actions"><button class="btn secondary" id="flip">Girar tabuleiro</button><button class="btn secondary" id="hint">Dica de jogada</button></div>
+<div class="chess-chat" id="chessChat" hidden><div class="chess-chat-head"><strong>💬 RESENHA CHAT</strong><small id="chatRoomLabel">Conversa da sala</small></div><div class="voice-bar"><div class="voice-status"><span class="voice-dot" id="voiceDot"></span><span id="voiceStatus">Voice desativado · chamada opcional</span></div><div class="voice-actions"><button type="button" class="primary" id="voiceJoin">Entrar / criar conta</button><button type="button" id="voiceMute" disabled>Silenciar</button><button type="button" id="voiceLeave" disabled>Sair da voz</button></div></div><div class="voice-note">O Resenha Voice é exclusivo para usuários cadastrados e logados. Entre na sua conta e confirme seu e-mail para liberar a chamada. Não gravamos o áudio.</div><div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">As mensagens da partida aparecerão aqui.</div></div><form class="chat-compose" id="chatForm"><input id="chatInput" maxlength="180" autocomplete="off" placeholder="Digite uma mensagem..." aria-label="Mensagem para o adversário"><button type="submit" id="chatSend">Enviar</button></form><div class="chat-footnote">Respeite seu adversário. Mensagens ofensivas podem ser filtradas.</div></div>
+</section></main>
+<footer class="footer">Resenha Chess · Um novo jeito de viver a estratégia dentro do Resenha do Fut.</footer>
+</div>
+<script type="module">
+import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm";
+(() => {
+'use strict';
+const ChessCtor = Chess;
+if(!ChessCtor){document.getElementById('status').textContent='Não foi possível carregar as regras do xadrez. Atualize a página.';return;}
+const glyph={wk:'♔',wq:'♕',wr:'♖',wb:'♗',wn:'♘',wp:'♙',bk:'♚',bq:'♛',br:'♜',bb:'♝',bn:'♞',bp:'♟'};
+const values={p:100,n:320,b:330,r:500,q:900,k:20000};
+const files='abcdefgh', ranks='87654321';
+let game=new ChessCtor(),selected=null,legal=[],orientation='w',mode='bot',thinking=false,history=[],lessonStep=0;
+let chessSocket=null,roomCode='',reconnectToken='',playerId='',playerColor=null,onlinePhase='idle',onlinePlayers=[],reconnectAttempts=0;
+let onlineStatus='Crie uma sala ou entre usando um código.',chatMessages=[];let voiceRoom=null,voiceMuted=false,voiceConnecting=false;
+const $=id=>document.getElementById(id);
+const clubCode=name=>name.split(/\s+/).map(x=>x[0]).join('').slice(0,3).toUpperCase();
+const clubPalettes={
+ 'Flamengo':['#d71920','#171717'],'Corinthians':['#f5f5f5','#171717'],'Palmeiras':['#087b43','#f5f5f5'],'São Paulo':['#e1262f','#171717'],'Santos':['#f5f5f5','#171717'],'Vasco':['#171717','#f5f5f5'],'Grêmio':['#1595d3','#171717'],'Internacional':['#d71920','#f5f5f5'],'Cruzeiro':['#1768bd','#f5f5f5'],'Atlético-MG':['#171717','#f5f5f5'],
+ 'Real Madrid':['#e8e8f2','#2856a6'],'Barcelona':['#a71930','#183b78'],'Manchester City':['#75c8e8','#ffffff'],'Liverpool':['#c8102e','#f4f4f4'],'Manchester United':['#da291c','#f4f4f4'],'Bayern de Munique':['#dc1f35','#ffffff'],'PSG':['#17418a','#e33b53'],'Arsenal':['#db1f35','#ffffff'],'Chelsea':['#1556a5','#ffffff'],'Juventus':['#171717','#f5f5f5']
+};
+const clubLogoIds={
+ 'Flamengo':127,'Corinthians':131,'Palmeiras':121,'São Paulo':126,'Santos':128,'Vasco':133,'Grêmio':130,'Internacional':119,'Cruzeiro':135,'Atlético-MG':1065,
+ 'Real Madrid':541,'Barcelona':529,'Manchester City':50,'Liverpool':40,'Manchester United':33,'Bayern de Munique':157,'PSG':85,'Arsenal':42,'Chelsea':49,'Juventus':496
+};
+function clubPalette(name){return clubPalettes[name]||['#a8ff3f','#17231a'];}
+function applyClubBadge(element,name){
+ if(!element)return;
+ const colors=clubPalette(name),code=clubCode(name),teamId=clubLogoIds[name];
+ element.classList.add('club-themed');element.classList.remove('has-logo');
+ element.style.setProperty('--club-primary',colors[0]);element.style.setProperty('--club-secondary',colors[1]);
+ element.title=name;element.setAttribute('aria-label','Escudo do '+name);
+ element.replaceChildren();
+ if(teamId){
+  const img=document.createElement('img');img.src='/club-logos/'+teamId+'.png';
+  img.alt='Escudo do '+name;img.loading='eager';img.decoding='async';img.referrerPolicy='no-referrer';
+  img.addEventListener('error',()=>{element.classList.remove('has-logo');element.textContent=code;},{once:true});
+  img.addEventListener('load',()=>element.classList.add('has-logo'),{once:true});
+  element.append(img);
+ }else element.textContent=code;
+}
+function clubForColor(color){
+ if(document.body.dataset.chessStyle!=='resenha')return '';
+ if(mode==='online'){const player=onlinePlayers.find(p=>p.color===color);return player?.club||'Resenha Bot';}
+ return color==='w'?$('club').value:'Resenha Bot';
+}
+function applyStadiumTheme(){document.body.dataset.stadium='maracana';}
+
+function renderChat(messages){
+ const box=$('chatMessages');if(!box)return;const list=Array.isArray(messages)?messages:[];chatMessages=list.slice();const wasNearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<45;box.replaceChildren();
+ if(!list.length){const empty=document.createElement('div');empty.className='chat-empty';empty.textContent='Seja o primeiro a mandar uma mensagem!';box.append(empty);}
+ list.forEach(message=>{const item=document.createElement('div');item.className='chat-message'+(message.playerId===playerId?' mine':'');const meta=document.createElement('div');meta.className='chat-message-meta';const name=document.createElement('strong');name.textContent=message.playerId===playerId?'Você':(message.name||'Adversário');const time=document.createElement('span');time.textContent=message.at?new Date(message.at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';const body=document.createElement('div');body.className='chat-message-body';body.textContent=message.text||'';meta.append(name,time);item.append(meta,body);box.append(item);});
+ if(wasNearBottom)box.scrollTop=box.scrollHeight;
+}
+function setVoiceStatus(text,active=false){$('voiceStatus').textContent=text;$('voiceDot').classList.toggle('on',!!active);}
+async function leaveVoice(update=true){
+ const current=voiceRoom;voiceRoom=null;voiceMuted=false;voiceConnecting=false;
+ if(current){try{await current.disconnect();}catch(e){}}
+ $('voiceJoin').disabled=onlinePhase!=='playing';$('voiceMute').disabled=true;$('voiceLeave').disabled=true;$('voiceMute').textContent='Silenciar';
+ if(update)setVoiceStatus('Voice desativado · chamada opcional',false);
+}
+async function joinVoice(){
+ if(voiceRoom||voiceConnecting||onlinePhase!=='playing'||!roomCode||!playerId)return;
+ const accessToken=getAccessToken();
+ if(!accessToken){setVoiceStatus('Para liberar o Resenha Voice, entre ou crie sua conta e confirme seu e-mail.');location.href='/conta';return;}
+ voiceConnecting=true;$('voiceJoin').disabled=true;setVoiceStatus('Preparando chamada…');
+ try{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('Seu navegador não oferece acesso ao microfone neste contexto. Use HTTPS.');
+  const response=await fetch('/api/chess-voice/token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:roomCode,playerId,reconnectToken,accessToken})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Não foi possível autorizar a chamada.');
+  const livekit=await import('https://cdn.jsdelivr.net/npm/livekit-client@2.15.6/+esm');
+  const room=new livekit.Room({adaptiveStream:true,dynacast:true});
+  room.on(livekit.RoomEvent.ParticipantConnected,participant=>setVoiceStatus(participant.name+' entrou na voz',true));
+  room.on(livekit.RoomEvent.ParticipantDisconnected,()=>setVoiceStatus('Aguardando o adversário na voz…',true));
+  room.on(livekit.RoomEvent.Disconnected,()=>{if(voiceRoom===room){voiceRoom=null;$('voiceJoin').disabled=onlinePhase!=='playing';$('voiceMute').disabled=true;$('voiceLeave').disabled=true;setVoiceStatus('Chamada desconectada',false);}});
+  await room.connect(data.server_url,data.participant_token);
+  voiceRoom=room;await room.localParticipant.setMicrophoneEnabled(true);voiceConnecting=false;voiceMuted=false;
+  $('voiceJoin').disabled=true;$('voiceMute').disabled=false;$('voiceLeave').disabled=false;
+  setVoiceStatus(room.remoteParticipants.size?Array.from(room.remoteParticipants.values())[0].name+' está na voz':'Você entrou · aguardando o adversário',true);
+ }catch(error){voiceConnecting=false;$('voiceJoin').disabled=onlinePhase!=='playing';setVoiceStatus(error.message||'Falha ao iniciar a chamada',false);}
+}
+async function toggleVoiceMute(){
+ if(!voiceRoom)return;
+ try{voiceMuted=!voiceMuted;await voiceRoom.localParticipant.setMicrophoneEnabled(!voiceMuted);$('voiceMute').textContent=voiceMuted?'Ativar microfone':'Silenciar';setVoiceStatus(voiceMuted?'Microfone silenciado':'Microfone ativado',true);}
+ catch(error){setVoiceStatus('Não foi possível alterar o microfone',false);}
+}
+function showGameNotice(message,type){const el=$('gameNotice');el.textContent=message||'';el.className='game-alert'+(type?' '+type:'');el.hidden=!message;}
+function render(){
+ const board=$('board');board.innerHTML='';const fen=game.board();
+ const rows=orientation==='w'?Array.from({length:8},(_,i)=>i):Array.from({length:8},(_,i)=>7-i);
+ const cols=orientation==='w'?Array.from({length:8},(_,i)=>i):Array.from({length:8},(_,i)=>7-i);
+ rows.forEach((r,ri)=>cols.forEach((c,ci)=>{
+  const sq=files[c]+(8-r),piece=fen[r][c],btn=document.createElement('button');
+  btn.className='square '+((r+c)%2?'dark':'light');btn.dataset.square=sq;btn.setAttribute('role','gridcell');btn.setAttribute('aria-label',sq+(piece?' '+piece.color+' '+piece.type:''));
+  if(selected===sq)btn.classList.add('selected');
+  const moves=legal.filter(m=>m.from===sq);if(moves.length)btn.classList.add(game.get(sq)?'capture':'hint');
+  if(ci===0){const co=document.createElement('span');co.className='coords';co.textContent=8-r;btn.append(co);}
+  if(ri===7){const co=document.createElement('span');co.className='coords';co.style.left='auto';co.style.top='auto';co.style.right='3px';co.style.bottom='1px';co.textContent=files[c];btn.append(co);}
+  if(piece){const el=document.createElement('span');el.className='piece '+(piece.color==='w'?'white':'black');el.textContent=glyph[piece.color+piece.type];const team=clubForColor(piece.color);if(team){const colors=clubPalette(team);el.classList.add('team-piece');el.style.setProperty('--team-primary',colors[0]);el.style.setProperty('--team-secondary',colors[1]);el.title=team;}btn.append(el);}
+  btn.addEventListener('click',()=>clickSquare(sq));board.append(btn);
+ }));
+ const moves=game.history();$('history').textContent=moves.length?moves.reduce((s,m,i)=>s+(i%2===0?Math.floor(i/2)+1+'. ':'')+m+' ', ''):'Movimentos aparecerão aqui.';
+ $('lastMoves').textContent=moves.length?moves.slice(-4).join(' · '):'A partida ainda não começou.';
+ $('status').textContent=mode==='online'?onlineStatus:game.isCheckmate()?'XEQUE-MATE! '+(game.turn()==='w'?'Pretas':'Brancas')+' venceram.':game.isDraw()?'Partida empatada.':game.isCheck()?'Xeque! '+(game.turn()==='w'?'Brancas':'Pretas')+' precisam se defender.':thinking?'O bot está pensando…':game.turn()==='w'?'Sua vez — brancas.':mode==='training'?'Vez do bot — pretas.':'Vez do bot — pretas.';
+ $('undo').disabled=history.length===0||thinking||mode==='online';
+ $('newGame').disabled=mode==='online';
+}
+function clickSquare(sq){
+ if(thinking||game.isGameOver()||(mode==='bot'&&game.turn()==='b')||(mode==='online'&&(!chessSocket||chessSocket.readyState!==1||!playerColor||game.turn()!==playerColor||onlinePhase!=='playing')))return;
+ if(selected&&legal.some(m=>m.from===selected&&m.to===sq)){
+  const piece=game.get(selected),promotion=piece.type==='p'&&(sq.endsWith('8')||sq.endsWith('1'))?'q':undefined;
+  if(mode==='online'){sendChess({type:'move',from:selected,to:sq,promotion});selected=null;legal=[];render();return;}
+  const move=game.move({from:selected,to:sq,promotion});
+  if(move){history.push(game.fen());selected=null;legal=[];render();afterHumanMove();}return;
+ }
+ const piece=game.get(sq);if(piece&&piece.color===game.turn()){selected=sq;legal=game.moves({square:sq,verbose:true});}else{selected=null;legal=[];}render();
+}
+function afterHumanMove(){
+ if(game.isGameOver()){finish();return;}
+ if(mode==='training'){trainingFeedback();if(game.turn()==='b')setTimeout(trainingReply,450);return;}
+ if(mode==='bot'&&game.turn()==='b'){thinking=true;render();setTimeout(botMove,350);}
+}
+function finish(){render();$('status').textContent=game.isCheckmate()?'XEQUE-MATE! '+(game.turn()==='w'?'O bot venceu.':'Você venceu!'):game.isDraw()?'Empate! Boa partida.':'Partida encerrada.';}
+function evaluate(g){
+ if(g.isCheckmate())return g.turn()==='b'?-100000:100000;
+ if(g.isDraw())return 0;
+ const board=g.board(),material={p:100,n:320,b:335,r:500,q:900,k:20000};
+ let score=0,bishops={w:0,b:0},pawnFiles={w:Array(8).fill(0),b:Array(8).fill(0)};
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+  const p=board[r][c];if(!p)continue;
+  const color=p.color,sign=color==='b'?1:-1,center=7-(Math.abs(3.5-r)+Math.abs(3.5-c));
+  let value=material[p.type];
+  if(p.type==='p'){
+   pawnFiles[color][c]++;
+   value+=(color==='w'?(6-r):(r-1))*7;
+   value+=Math.max(0,center)*2;
+  }else if(p.type==='n')value+=center*10;
+  else if(p.type==='b'){value+=center*6;bishops[color]++;}
+  else if(p.type==='r'){if(c===3||c===4)value+=8;}
+  else if(p.type==='q')value+=center*2;
+  else if(p.type==='k'){
+   const early=g.moveNumber()<18;
+   if(early)value-=Math.max(0,center)*7;
+   const shield=color==='w'?(r===7?1:0):(r===0?1:0);
+   if(shield){const pawnRow=color==='w'?6:1;for(let x=Math.max(0,c-1);x<=Math.min(7,c+1);x++)if(board[pawnRow][x]?.type==='p'&&board[pawnRow][x].color===color)value+=12;}
+  }
+  score+=sign*value;
+ }
+ if(bishops.w>=2)score-=28;if(bishops.b>=2)score+=28;
+ for(const color of ['w','b']){
+  const sign=color==='b'?1:-1,counts=pawnFiles[color];
+  for(let c=0;c<8;c++)if(counts[c]>1)score+=sign*(-14*(counts[c]-1));
+  for(let c=0;c<8;c++)if(counts[c]&&!(counts[c-1]||counts[c+1]))score+=sign*-10;
+ }
+ return score;
+}
+function moveOrder(m){
+ const vals={p:100,n:320,b:335,r:500,q:900,k:20000};
+ let s=m.captured?10*vals[m.captured]-vals[m.piece]:0;
+ if(m.promotion)s+=vals[m.promotion]+800;
+ if(m.flags&&m.flags.includes('k'))s+=35;
+ return s;
+}
+function quiescence(g,alpha,beta,ply,nodes,qDepth){
+ nodes.count++;if(g.isCheckmate())return g.turn()==='b'?-100000+ply:100000-ply;if(g.isDraw())return 0;
+ const checked=g.isCheck(),stand=evaluate(g),maximizing=g.turn()==='b';
+ if(nodes.count>nodes.limit||qDepth<=0)return stand;
+ if(!checked){
+  if(maximizing){if(stand>=beta)return beta;alpha=Math.max(alpha,stand);}
+  else{if(stand<=alpha)return alpha;beta=Math.min(beta,stand);}
+ }
+ let moves=g.moves({verbose:true});
+ if(!checked)moves=moves.filter(m=>m.captured||m.promotion);
+ moves.sort((a,b)=>moveOrder(b)-moveOrder(a));
+ if(!moves.length)return stand;
+ let best=maximizing?-Infinity:Infinity;
+ for(const m of moves){
+  if(nodes.count>nodes.limit)break;
+  g.move({from:m.from,to:m.to,promotion:m.promotion});
+  const score=quiescence(g,alpha,beta,ply+1,nodes,qDepth-1);
+  g.undo();
+  if(maximizing){best=Math.max(best,score);alpha=Math.max(alpha,best);}
+  else{best=Math.min(best,score);beta=Math.min(beta,best);}
+  if(beta<=alpha)break;
+ }
+ return checked?best:(maximizing?Math.max(stand,best):Math.min(stand,best));
+}
+function searchPosition(g,depth,alpha,beta,ply,nodes){
+ nodes.count++;
+ if(nodes.count>nodes.limit)return evaluate(g);
+ if(g.isCheckmate())return g.turn()==='b'?-100000+ply:100000-ply;
+ if(g.isDraw())return 0;
+ if(depth<=0)return quiescence(g,alpha,beta,ply,nodes,4);
+ const maximizing=g.turn()==='b',moves=g.moves({verbose:true});
+ moves.sort((a,b)=>moveOrder(b)-moveOrder(a));
+ let best=maximizing?-Infinity:Infinity;
+ for(const m of moves){
+  if(nodes.count>nodes.limit)break;
+  g.move({from:m.from,to:m.to,promotion:m.promotion});
+  const score=searchPosition(g,depth-1,alpha,beta,ply+1,nodes);
+  g.undo();
+  if(maximizing){best=Math.max(best,score);alpha=Math.max(alpha,best);}
+  else{best=Math.min(best,score);beta=Math.min(beta,best);}
+  if(beta<=alpha)break;
+ }
+ return best;
+}
+function chooseBotMove(){
+ const moves=game.moves({verbose:true});if(!moves.length)return null;
+ const level=$('difficulty').value;
+ if(level==='easy')return moves[Math.floor(Math.random()*moves.length)];
+ const depth=level==='hard'?3:2,nodes={count:0,limit:level==='hard'?24000:9000};
+ moves.sort((a,b)=>moveOrder(b)-moveOrder(a));
+ let bestScore=-Infinity,bestMoves=[];
+ for(const m of moves){
+  if(nodes.count>nodes.limit)break;
+  game.move({from:m.from,to:m.to,promotion:m.promotion});
+  const score=searchPosition(game,depth-1,-Infinity,Infinity,1,nodes);
+  game.undo();
+  if(score>bestScore){bestScore=score;bestMoves=[m];}
+  else if(score===bestScore)bestMoves.push(m);
+ }
+ return bestMoves.length?bestMoves[Math.floor(Math.random()*bestMoves.length)]:moves[0];
+}
+function botMove(){if(mode!=='bot'||game.turn()!=='b'||game.isGameOver()){thinking=false;render();return;}const move=chooseBotMove();if(move){game.move(move);history.push(game.fen());}thinking=false;selected=null;legal=[];render();if(game.isGameOver())finish();}
+const lessons=[['e2','e4','Comece ocupando o centro. Os peões centrais ajudam a controlar casas importantes.'],['e7','e5','O bot responde disputando o centro.'],['g1','f3','Desenvolva os cavalos: tire as peças de suas casas iniciais.'],['b8','c6','As pretas desenvolvem uma peça e defendem o peão central.']];
+function trainingFeedback(){const m=game.history({verbose:true}).slice(-1)[0];if(!m)return;const found=lessons[lessonStep];if(found&&m.from===found[0]&&m.to===found[1])$('modeInfo').textContent=found[2];else $('modeInfo').textContent='Boa! Observe como suas peças controlam o centro e se protegem. Dica: desenvolva cavalos e bispos antes de atacar.';lessonStep++;}
+function trainingReply(){if(mode!=='training'||game.turn()!=='b'||game.isGameOver())return;const moves=game.moves({verbose:true});const prefer=lessonStep<lessons.length?lessons[lessonStep]:null;let m=prefer?moves.find(x=>x.from===prefer[0]&&x.to===prefer[1]):null;if(!m)m=moves.find(x=>x.piece==='p'&&['e5','d5','c5'].includes(x.to))||moves[Math.floor(Math.random()*moves.length)];if(m)game.move(m);if(prefer&&m)lessonStep++;history.push(game.fen());render();if(game.isGameOver())finish();else if(lessonStep<lessons.length)$('modeInfo').textContent=lessons[lessonStep][2];}
+function getAccessToken(){
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k||!k.endsWith('-auth-token'))continue;const data=JSON.parse(localStorage.getItem(k)||'{}');if(data.access_token)return data.access_token;}}catch(e){}return '';
+}
+function updateChessVoiceAccess(){
+ const authenticated=!!getAccessToken();
+ if(!voiceRoom&&!voiceConnecting){
+  $('voiceJoin').textContent=authenticated?'Entrar na voz':'Entrar / criar conta';
+  if(!authenticated&&onlinePhase==='playing')setVoiceStatus('Para liberar o Resenha Voice, entre ou crie sua conta e confirme seu e-mail.');
+ }
+}
+function sendChess(data){if(chessSocket&&chessSocket.readyState===1)chessSocket.send(JSON.stringify(data));}
+function setOnlineStatus(text){onlineStatus=text;$('onlineStatus').textContent=text;render();}
+function clearSavedRoom(){try{localStorage.removeItem('resenhaChessRoom');localStorage.removeItem('resenhaChessReconnect');}catch(e){}}
+function connectChess(payload){
+ if(chessSocket){try{chessSocket.close();}catch(e){}}
+ const protocol=location.protocol==='https:'?'wss:':'ws:';
+ const ws=new WebSocket(protocol+'//'+location.host+'/resenha-chess-ws');chessSocket=ws;
+ ws.addEventListener('open',()=>{if(chessSocket===ws)ws.send(JSON.stringify(payload));});
+ ws.addEventListener('message',event=>{
+  if(chessSocket!==ws)return;let data;try{data=JSON.parse(event.data);}catch(e){return;}
+  if(data.type==='joined'||data.type==='reconnected'){
+   reconnectAttempts=0;roomCode=data.code;playerId=data.playerId||playerId;playerColor=data.color;reconnectToken=data.reconnectToken;orientation=playerColor;
+   try{localStorage.setItem('resenhaChessRoom',roomCode);localStorage.setItem('resenhaChessReconnect',reconnectToken);}catch(e){}
+   $('roomCodeInput').value=roomCode;$('copyRoom').disabled=false;$('leaveRoom').disabled=false;
+   setOnlineStatus('Conectado à sala '+roomCode+'. Você joga com as '+(playerColor==='w'?'brancas':'pretas')+'.');
+  }else if(data.type==='room_created'){
+   roomCode=data.code;$('roomCodeInput').value=roomCode;$('copyRoom').disabled=false;$('leaveRoom').disabled=false;
+   setOnlineStatus('Sala '+roomCode+' criada. Envie o código ao seu adversário.');
+  }else if(data.type==='state'){
+   roomCode=data.code;onlinePhase=data.phase;onlinePlayers=data.players||[];
+   const self=onlinePlayers.find(p=>p.id===playerId);if(self){playerColor=self.color;orientation=playerColor;}
+   try{if(data.pgn)game.loadPgn(data.pgn);else game.load(data.fen);}catch(e){setOnlineStatus('Não foi possível sincronizar a posição.');return;}
+   selected=null;legal=[];history=[];orientation=playerColor||'w';
+   const white=onlinePlayers.find(p=>p.color==='w'),black=onlinePlayers.find(p=>p.color==='b');
+   const own=onlinePlayers.find(p=>p.color===playerColor),opponent=onlinePlayers.find(p=>p.color!==(playerColor||'w'));
+   $('yourClub').textContent=own?(own.club||own.name):'Você';$('yourMeta').textContent='Você · '+(playerColor==='w'?'Brancas':'Pretas');applyClubBadge($('yourCrest'),$('yourClub').textContent);
+   $('opponentClub').textContent=opponent?(opponent.club||opponent.name):'Aguardando adversário';$('opponentMeta').textContent=opponent?(opponent.name+' · '+(opponent.color==='w'?'Brancas':'Pretas')+(opponent.online?' · conectado':' · reconectando')):'Aguardando jogador';if(opponent&&opponent.club)applyClubBadge($('opponentCrest'),opponent.club);else{$('opponentCrest').classList.remove('club-themed','has-logo');$('opponentCrest').textContent='BOT';}
+   $('boardTitle').textContent='Sala '+roomCode+' · '+(onlinePhase==='waiting'?'Aguardando jogador':onlinePhase==='finished'?'Partida encerrada':'Partida online');
+   if(onlinePhase==='waiting')onlineStatus='Sala criada. Compartilhe o código '+roomCode+' e aguarde o segundo jogador.';
+   else if(onlinePhase==='finished')onlineStatus=data.result||'Partida encerrada. Solicite uma revanche.';
+   else if(!opponent||!opponent.online)onlineStatus='Adversário desconectado. Aguardando reconexão…';
+   else onlineStatus=game.turn()===playerColor?'Sua vez. Faça sua jogada.':'Vez do adversário — aguardando jogada.';
+   $('onlineStatus').textContent=onlineStatus;$('chessChat').hidden=onlinePhase==='idle';$('chatRoomLabel').textContent='Sala '+roomCode+' · '+(onlinePlayers.length===2?'2 jogadores':'aguardando adversário');$('chatInput').disabled=onlinePhase==='finished';$('chatSend').disabled=onlinePhase==='finished';$('voiceJoin').disabled=onlinePhase!=='playing'||!!voiceRoom||voiceConnecting; updateChessVoiceAccess(); if((onlinePhase!=='playing'||(onlinePlayers.length!==2||onlinePlayers.some(player=>!player.online)))&&voiceRoom)leaveVoice();renderChat(data.chat);const offeredBy=data.drawOfferedBy||null;const ownOffer=onlinePlayers.find(p=>p.id===offeredBy&&p.id===playerId);const offerButton=$('offerDraw');offerButton.disabled=onlinePhase!=='playing'||!!ownOffer;offerButton.textContent=offeredBy&&!ownOffer?'Aceitar empate':'Oferecer empate';offerButton.dataset.action=offeredBy&&!ownOffer?'accept':'offer';$('resign').disabled=onlinePhase!=='playing';$('rematch').disabled=onlinePhase!=='finished';if(onlinePhase==='finished')showGameNotice(data.result||'Partida encerrada.','success');else if(onlinePhase==='waiting')showGameNotice('Sala criada. Aguardando o segundo jogador.','info');else if(!opponent||!opponent.online)showGameNotice('Seu adversário perdeu a conexão. Aguardando a reconexão…');else if(offeredBy)showGameNotice(offeredBy===playerId?'Você ofereceu empate. Aguardando a resposta do adversário.':'Seu adversário ofereceu empate. Você pode aceitar a proposta no painel Online.');else showGameNotice('');render();
+  }else if(data.type==='chat_message'){if(data.message){chatMessages.push(data.message);if(chatMessages.length>50)chatMessages.shift();renderChat(chatMessages);}}
+  else if(data.type==='error'){setOnlineStatus(data.message||'Não foi possível completar a ação.');}
+  else if(data.type==='room_closed'){showGameNotice(data.reason||'A sala foi encerrada.','success');clearSavedRoom();roomCode='';playerColor=null;onlinePhase='idle';$('copyRoom').disabled=true;$('leaveRoom').disabled=true;$('chessChat').hidden=true;leaveVoice();setOnlineStatus(data.reason||'A sala foi encerrada.');}
+ });
+ ws.addEventListener('close',()=>{if(chessSocket!==ws||mode!=='online')return;let savedCode='',savedToken='';try{savedCode=localStorage.getItem('resenhaChessRoom')||'';savedToken=localStorage.getItem('resenhaChessReconnect')||'';}catch(e){}if(savedCode&&savedToken&&reconnectAttempts<5){const wait=Math.min(1000*Math.pow(2,reconnectAttempts),8000);reconnectAttempts++;setOnlineStatus('Conexão interrompida. Tentando reconectar em '+Math.ceil(wait/1000)+'s…');setTimeout(()=>{if(mode==='online'&&!chessSocket||mode==='online'&&chessSocket.readyState===3)connectChess({type:'reconnect',code:savedCode,reconnectToken:savedToken});},wait);}else setOnlineStatus('Conexão encerrada. Tente entrar novamente na sala.');});
+ ws.addEventListener('error',()=>{if(chessSocket===ws)setOnlineStatus('Não foi possível conectar ao servidor. Tente novamente.');});
+}
+function restoreChessRoom(){
+ let code='',token='';try{code=localStorage.getItem('resenhaChessRoom')||'';token=localStorage.getItem('resenhaChessReconnect')||'';}catch(e){}
+ if(code&&token){roomCode=code;reconnectToken=token;setOnlineStatus('Tentando recuperar a sala '+code+'…');connectChess({type:'reconnect',code,reconnectToken:token});}
+ else setOnlineStatus('Crie uma sala e compartilhe o código, ou entre usando um código recebido.');
+}
+$('chooseCreateRoom').addEventListener('click',()=>{
+ if(mode!=='online')return;const name=$('playerName').value.trim()||'Jogador';roomCode='';playerColor=null;onlinePhase='idle';setOnlineStatus('Criando sala…');
+ connectChess({type:'create',name,club:$('club').value,accessToken:getAccessToken()});
+});
+$('chooseJoinRoom').addEventListener('click',()=>{$('roomChoices').hidden=true;$('joinRoomBox').hidden=false;$('roomCodeInput').focus();});
+$('backRoomChoices').addEventListener('click',()=>{$('joinRoomBox').hidden=true;$('roomChoices').hidden=false;$('roomCodeInput').value='';});
+$('joinRoom').addEventListener('click',()=>{
+ if(mode!=='online')return;const code=$('roomCodeInput').value.trim().toUpperCase();
+ if(!/^[A-Z0-9]{6}$/.test(code)){setOnlineStatus('Informe um código de sala com 6 caracteres.');return;}
+ setOnlineStatus('Entrando na sala '+code+'…');connectChess({type:'join',code,name:$('playerName').value.trim()||'Jogador',club:$('club').value,accessToken:getAccessToken()});
+});
+$('copyRoom').addEventListener('click',async()=>{
+ if(!roomCode)return;try{await navigator.clipboard.writeText(roomCode);setOnlineStatus('Código '+roomCode+' copiado. Envie ao seu adversário.');}catch(e){$('roomCodeInput').select();setOnlineStatus('Selecione e copie o código da sala.');}
+});
+$('leaveRoom').addEventListener('click',()=>{sendChess({type:'leave'});if(chessSocket)chessSocket.close();chessSocket=null;clearSavedRoom();roomCode='';playerColor=null;onlinePhase='idle';$('copyRoom').disabled=true;$('leaveRoom').disabled=true;$('rematch').disabled=true;$('chessChat').hidden=true;leaveVoice();setOnlineStatus('Você saiu da sala.');});
+$('voiceJoin').addEventListener('click',joinVoice);$('voiceMute').addEventListener('click',toggleVoiceMute);$('voiceLeave').addEventListener('click',()=>leaveVoice());
+$('chatForm').addEventListener('submit',event=>{event.preventDefault();const text=$('chatInput').value.trim();if(!text||!chessSocket||chessSocket.readyState!==1||onlinePhase==='finished')return;sendChess({type:'chat',text});$('chatInput').value='';$('chatInput').focus();});
+$('offerDraw').addEventListener('click',()=>{const action=$('offerDraw').dataset.action||'offer';sendChess({type:action==='accept'?'accept_draw':'offer_draw'});$('offerDraw').disabled=true;setOnlineStatus(action==='accept'?'Aceitando o empate…':'Oferta de empate enviada ao adversário.');});
+$('resign').addEventListener('click',()=>{if(!confirm('Tem certeza de que deseja desistir da partida?'))return;sendChess({type:'resign'});$('resign').disabled=true;});
+$('rematch').addEventListener('click',()=>{sendChess({type:'rematch'});$('rematch').disabled=true;setOnlineStatus('Pedido de revanche enviado. Aguardando o adversário.');});
+function newGame(){showGameNotice('');game=new ChessCtor();selected=null;legal=[];history=[];lessonStep=0;thinking=false;orientation='w';$('modeInfo').textContent=mode==='training'?'Treinamento: vamos começar pelo centro. Tente jogar e2 para e4.':'Você joga com as peças claras. Selecione uma peça e depois a casa de destino.';render();}
+document.querySelectorAll('.mode').forEach(btn=>btn.addEventListener('click',()=>{
+ const nextMode=btn.dataset.mode;
+ if(mode==='online'&&nextMode!=='online'&&chessSocket){leaveVoice();chessSocket.close();chessSocket=null;}
+ mode=nextMode;document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('active',x===btn));$('onlineControls').style.display=mode==='online'?'block':'none';$('onlineControls').closest('.controls').classList.toggle('online-active',mode==='online');
+ $('difficultyField').style.display=mode==='bot'?'block':'none';
+ const resenhaStyle=document.body.dataset.chessStyle==='resenha';$('boardTitle').textContent=mode==='online'?(resenhaStyle?'Resenha Chess · Online':'Chess Clássico · Online'):mode==='training'?(resenhaStyle?'Resenha Chess · Treinamento':'Chess Clássico · Treinamento'):resenhaStyle?'Resenha Chess':'Chess Clássico';
+ $('modeInfo').textContent=mode==='online'?'Crie uma sala ou entre usando um código.':mode==='training'?'Treinamento: vamos começar pelo centro. Tente jogar e2 para e4.':'Você joga com as peças claras. O bot começa com as peças escuras.';
+ newGame();if(mode==='online')restoreChessRoom();
+}));
+$('newGame').addEventListener('click',newGame);
+$('undo').addEventListener('click',()=>{if(!history.length||thinking)return;game.undo();if(mode==='bot'&&game.turn()==='b')game.undo();history=[];selected=null;legal=[];render();});
+$('flip').addEventListener('click',()=>{orientation=orientation==='w'?'b':'w';render();});
+$('hint').addEventListener('click',()=>{if(game.isGameOver()||game.turn()!=='w')return;const m=chooseBotMoveForWhite();if(m){selected=m.from;legal=game.moves({square:m.from,verbose:true});render();$('status').textContent='Dica: experimente '+m.from+' → '+m.to+'.';}});
+function chooseBotMoveForWhite(){const moves=game.moves({verbose:true});if(!moves.length)return null;return moves.sort((a,b)=>(b.captured?values[b.captured]:0)-(a.captured?values[a.captured]:0))[0];}
+$('club').addEventListener('change',()=>{$('yourClub').textContent=$('club').value;applyClubBadge($('yourCrest'),$('club').value);if(mode!=='online'){$('opponentClub').textContent='Resenha Bot';$('opponentMeta').textContent=($('difficulty').selectedOptions[0]?.textContent||'Médio')+' · Pretas';$('opponentCrest').classList.remove('club-themed','has-logo');$('opponentCrest').textContent='BOT';}render();});
+
+document.body.dataset.chessStyle='classic';applyStadiumTheme();document.querySelectorAll('[data-chess-style]').forEach(btn=>btn.addEventListener('click',()=>{const style=btn.dataset.chessStyle;document.body.dataset.chessStyle=style;document.querySelectorAll('[data-chess-style]').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});$('customFields').classList.toggle('visible',style==='resenha');applyStadiumTheme();if(style==='classic'){$('boardTitle').textContent=mode==='online'?'Chess Clássico · Online':mode==='training'?'Chess Clássico · Treinamento':'Chess Clássico';showGameNotice('');}else{$('boardTitle').textContent=mode==='online'?'Resenha Chess · Online':mode==='training'?'Resenha Chess · Treinamento':'Resenha Chess';}render();}));$('onlineControls').style.display='none';$('club').dispatchEvent(new Event('change'));newGame();
+})();
+</script>
+<script>(()=>{document.querySelectorAll('.nav-dropdown').forEach(d=>{const b=d.querySelector('.nav-dropdown-toggle');if(!b)return;b.addEventListener('click',()=>{const open=d.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});document.addEventListener('click',e=>{if(!d.contains(e.target)){d.classList.remove('open');b.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'){d.classList.remove('open');b.setAttribute('aria-expanded','false');b.focus()}})})})();</script><script src="/nav.js" defer></script>
+</body></html>

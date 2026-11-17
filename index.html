@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d0b">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<title>Resenha do Fut — Jogos de futebol, desafios e multiplayer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#080d0b;--panel:#101713;--panel2:#151e17;--line:#29372d;--text:#f4f6f4;--muted:#a6b0a8;--lime:#a8ff3f;--lime-dark:#162412;--blue:#83b6ff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}
+a:focus-visible{outline:3px solid var(--lime);outline-offset:4px}
+.wrap{width:min(1120px,calc(100% - 40px));margin-inline:auto}
+.app{min-height:100vh;overflow:hidden;background:radial-gradient(ellipse at 82% -5%,rgba(168,255,63,.13),transparent 34%),var(--bg)}
+.nav{height:82px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid #26332b}
+.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.6px}
+.brand-icon{width:52px;height:56px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.brand-logo{display:block;width:100%;height:100%;object-fit:contain}
+.brand-name{font-size:17px;line-height:1.02}
+.brand-name span{color:var(--lime);font-family:"Barlow Condensed",Impact,sans-serif;font-style:italic;font-size:21px;letter-spacing:.3px}
+.navlinks{display:flex;align-items:center;gap:26px;color:#b7c0b9;font-size:13px;font-weight:600}
+.navlinks a:hover{color:var(--lime)}.nav-dropdown{position:relative}.nav-dropdown-toggle{border:0;background:none;color:inherit;font:inherit;padding:12px 0;cursor:pointer}.nav-dropdown-toggle span{color:var(--lime);margin-left:4px}.nav-dropdown-menu{display:none;position:absolute;z-index:20;top:100%;left:-14px;min-width:220px;padding:8px;background:#111a14;border:1px solid #354633;border-radius:12px;box-shadow:0 18px 40px #0009}.nav-dropdown:hover .nav-dropdown-menu,.nav-dropdown:focus-within .nav-dropdown-menu,.nav-dropdown.open .nav-dropdown-menu{display:grid}.nav-dropdown-menu a{padding:10px 11px;border-radius:7px;color:#dce5dd}.nav-dropdown-menu a:hover{background:#24351e;color:var(--lime)}.nav-dropdown-menu small{font-size:9px;color:var(--lime);margin-left:5px;font-weight:900}
+.nav-cta,.primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--lime);color:#101810;border:1px solid var(--lime);border-radius:10px;padding:12px 17px;font-weight:900;font-size:13px;transition:transform .18s ease,filter .18s ease}
+.nav-cta:hover,.primary:hover{transform:translateY(-2px);filter:brightness(1.05)}
+.hero{position:relative;padding:76px 0 58px}
+.hero:after{content:"⚽";position:absolute;right:-20px;top:25px;font-size:clamp(190px,27vw,340px);opacity:.055;transform:rotate(-18deg);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid #34452e;background:#111a12;border-radius:999px;color:var(--lime);font-size:10px;letter-spacing:1.4px;font-weight:900;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime)}
+h1,h2,h3,p{margin-top:0}
+.hero h1{position:relative;z-index:1;font-family:"Barlow Condensed",Impact,sans-serif;font-size:clamp(54px,8vw,92px);line-height:.91;letter-spacing:.2px;text-transform:uppercase;max-width:790px;margin:24px 0 20px;font-weight:900}
+.hero h1 span{color:var(--lime)}
+.hero p{position:relative;z-index:1;color:var(--muted);line-height:1.8;max-width:570px;font-size:15px;margin-bottom:26px}
+.hero-actions{position:relative;z-index:1;display:flex;gap:12px;flex-wrap:wrap}
+.secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 17px;border-radius:10px;font-weight:800;font-size:13px;background:#101713;border:1px solid #344139;color:var(--text)}
+.secondary:hover{border-color:var(--lime)}
+.stats{display:flex;gap:30px;margin-top:36px;flex-wrap:wrap}
+.activity-panel{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 auto 8px;padding:17px 20px;border:1px solid #29372d;border-radius:14px;background:linear-gradient(110deg,rgba(168,255,63,.07),rgba(16,23,19,.96) 45%);box-shadow:0 12px 30px #0002}
+.activity-title{display:flex;align-items:center;gap:9px;color:#dfe9e1;font-size:12px;font-weight:800;letter-spacing:.2px}
+.activity-live-dot{width:8px;height:8px;border-radius:50%;background:#a8ff3f;box-shadow:0 0 11px #a8ff3f;flex:0 0 auto}
+.activity-metrics{display:flex;align-items:center;gap:26px}
+.activity-metric{display:flex;align-items:baseline;gap:8px}
+.activity-metric strong{font-size:23px;line-height:1;color:#a8ff3f;letter-spacing:-.8px;font-variant-numeric:tabular-nums}
+.activity-metric span{font-size:10px;color:#9aa69d;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.activity-status{font-size:10px;color:#819087;margin-top:3px}
+@media(max-width:600px){.activity-panel{align-items:flex-start;flex-direction:column;gap:13px;padding:15px}.activity-metrics{width:100%;justify-content:space-between;gap:12px}.activity-metric{gap:6px}.activity-metric strong{font-size:21px}.activity-metric span{font-size:9px}}
+
+.stat strong{display:block;font-size:22px;letter-spacing:-.7px}
+.stat span{color:#8e9a91;font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.section{padding:32px 0 62px}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.kicker{color:var(--lime);font-size:10px;font-weight:900;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:8px}
+.section-head h2{font-size:clamp(25px,4vw,35px);letter-spacing:-1px;line-height:1.12;margin-bottom:7px}
+.section-head p{color:#98a49b;margin:0;font-size:13px}
+.games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.game{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#17221a,#0d130f 72%);position:relative;min-height:300px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease,border-color .2s ease}
+.game:hover{transform:translateY(-3px);border-color:#526d42}
+.game:before{content:"";position:absolute;width:220px;height:220px;right:-45px;top:-50px;border:1px solid rgba(168,255,63,.18);border-radius:50%;box-shadow:0 0 0 25px rgba(168,255,63,.025),0 0 0 50px rgba(168,255,63,.02);pointer-events:none}
+.game.alt{background:linear-gradient(135deg,#151c24,#0d1218 75%)}
+.game.alt:before{border-color:rgba(131,182,255,.25);box-shadow:0 0 0 25px rgba(131,182,255,.035),0 0 0 50px rgba(131,182,255,.02)}
+.game-content{padding:25px;position:relative;z-index:1}
+.game-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pill{border:1px solid #40523a;border-radius:999px;padding:6px 9px;color:var(--lime);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.7px}
+.alt .pill{color:var(--blue);border-color:#304b70}
+.game-icon{width:54px;height:54px;border-radius:15px;background:#24351e;color:var(--lime);display:grid;place-items:center;font-size:27px;border:1px solid #3a542d}
+.alt .game-icon{background:#1a2b40;color:var(--blue);border-color:#2a4565}
+.game h3{font-size:28px;letter-spacing:-.8px;margin:22px 0 9px}
+.game p{color:#aab5ac;line-height:1.7;font-size:13px;max-width:390px;margin-bottom:18px}
+.meta{display:flex;gap:14px;flex-wrap:wrap;color:#8e9b91;font-size:11px;margin-bottom:20px}
+.meta span{display:flex;align-items:center;gap:5px}
+.game .primary{padding:12px 15px}
+.alt .primary{background:var(--blue);border-color:var(--blue)}
+.game-foot{padding:13px 25px;border-top:1px solid #29372d;background:rgba(0,0,0,.13);font-size:10px;color:#87958b;display:flex;justify-content:space-between;gap:10px;letter-spacing:.5px}
+.game.manager{grid-column:auto;min-height:300px;background:linear-gradient(115deg,#1a2818,#0d130f 72%);border-color:#405b31}.manager-layout{display:block}.manager .game-icon{background:#24351e;color:var(--lime);border-color:#3a542d}.manager-preview{display:none;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:15px;border:1px solid #354633;border-radius:13px;background:rgba(4,9,5,.48)}.manager-metric{padding:12px 10px;border-radius:9px;background:#121d13;border:1px solid #2a3b27}.manager-metric span{display:block;color:#94a28f;font-size:10px;text-transform:uppercase;letter-spacing:.7px}.manager-metric strong{display:block;margin-top:7px;font-size:20px;color:var(--lime)}.manager-bars{grid-column:1/-1;display:flex;align-items:end;gap:5px;height:42px;padding-top:4px}.manager-bars i{display:block;flex:1;background:var(--lime);border-radius:3px 3px 0 0;opacity:.8}.manager-soon{background:#192218;color:var(--lime);border:1px solid #526d42;cursor:pointer}.manager-soon:hover{transform:none;filter:none}@media(max-width:760px){.game.manager{grid-column:auto}.manager-layout{display:block}}
+.exclusive-section{margin-top:4px;padding-top:34px;border-top:1px solid #26332b}.exclusive-section .section-head{align-items:center}.exclusive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.exclusive-grid .game{border-color:#465b37}.exclusive-grid .game.alt{border-color:#304b70}.exclusive-grid .game:after{content:"CADASTRO GRATUITO";position:absolute;right:18px;bottom:64px;color:#a8ff3f;font-size:9px;font-weight:900;letter-spacing:1px;opacity:.75}.exclusive-grid .game.alt:after{color:#83b6ff}@media(max-width:760px){.exclusive-grid{grid-template-columns:1fr}.exclusive-section .section-head{align-items:flex-start}}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tool{border:1px solid #253229;background:#0d130f;border-radius:14px;padding:20px;display:flex;gap:14px}
+.tool-icon{font-size:23px;line-height:1.2}
+.tool h3{font-size:15px;margin-bottom:7px}
+.tool p{font-size:12px;color:#93a096;line-height:1.65;margin-bottom:0}
+.community{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:29px;border-radius:18px;background:linear-gradient(105deg,#b1ff4a,#8dda32);color:#101810;margin-bottom:56px}
+.community h2{font-size:clamp(22px,3vw,28px);margin-bottom:7px;letter-spacing:-.8px}
+.community p{font-size:13px;margin:0;opacity:.8}
+.community a{white-space:nowrap;background:#101810;color:#efffdf;padding:13px 16px;border-radius:9px;font-size:12px;font-weight:900}
+.footer{border-top:1px solid #243128;padding:24px 0 34px;color:#7e8b81;font-size:11px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.footer strong{color:#eaf0ea}
+@media(max-width:760px){.wrap{width:min(100% - 28px,600px)}.nav{height:70px}.navlinks>a:not(.nav-cta){display:none}.nav-dropdown-toggle{font-size:11px}.nav-dropdown-menu{left:auto;right:-68px;min-width:210px}.navlinks{gap:10px}.brand-name{font-size:16px}.hero{padding:54px 0 38px}.hero:after{right:-65px;top:70px;font-size:200px}.hero p{font-size:14px}.games{grid-template-columns:1fr}.game{min-height:280px}.tools{grid-template-columns:1fr}.section{padding-bottom:43px}.community{align-items:flex-start;flex-direction:column}.section-head{align-items:flex-start;flex-direction:column}.stats{gap:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+
+.site-header{width:min(1120px,calc(100% - 40px));height:82px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid #26332b;position:relative;z-index:30}
+.site-brand{display:flex;align-items:center;gap:12px;color:var(--text,var(--tx,#f4f6f4));text-decoration:none;font-weight:900;letter-spacing:-.6px;flex-shrink:0}
+.site-brand-icon{width:52px;height:56px;display:block;object-fit:contain}
+.site-brand-name{font-size:17px;line-height:1.02}.site-brand-name span{display:block;color:var(--lime,var(--ac,#a8ff3f));font:italic 900 21px "Barlow Condensed",Impact,sans-serif;letter-spacing:.3px}
+.site-nav{display:flex;align-items:center;gap:clamp(10px,1.6vw,20px);font-size:12px;font-weight:700;color:var(--muted,var(--mu,#a6b0a8))}
+.site-nav>a{color:inherit;text-decoration:none;white-space:nowrap}.site-nav>a:hover,.nav-dropdown-toggle:hover{color:var(--lime,var(--ac,#a8ff3f))}
+.site-nav .home-cta{background:var(--lime,var(--ac,#a8ff3f));color:#101810;padding:10px 14px;border-radius:9px}
+.nav-dropdown{position:relative}.nav-dropdown-toggle{border:0;background:none;color:inherit;font:inherit;padding:12px 0;cursor:pointer;white-space:nowrap}.nav-dropdown-toggle span{color:var(--lime,var(--ac,#a8ff3f));margin-left:4px}
+.nav-dropdown-menu{display:none;position:absolute;z-index:40;top:100%;left:-14px;min-width:220px;padding:8px;background:#111a14;border:1px solid #354633;border-radius:12px;box-shadow:0 18px 40px #0009}
+.nav-dropdown:hover .nav-dropdown-menu,.nav-dropdown:focus-within .nav-dropdown-menu,.nav-dropdown.open .nav-dropdown-menu{display:grid}
+.nav-dropdown-menu a{padding:10px 11px;border-radius:7px;color:#dce5dd;text-decoration:none}.nav-dropdown-menu a:hover{background:#24351e;color:#a8ff3f}.nav-dropdown-menu small{font-size:9px;color:#a8ff3f;margin-left:5px;font-weight:900}
+@media(max-width:760px){.site-header{width:calc(100% - 28px);height:70px}.site-brand-icon{width:44px;height:48px}.site-brand-name{font-size:15px}.site-nav{gap:10px}.site-nav>a:not(.home-cta){display:none}.nav-dropdown-toggle{font-size:11px}.nav-dropdown-menu{left:auto;right:-68px;min-width:210px}}
+
+.mobile-menu-toggle{display:none}
+@media(max-width:760px){
+  .site-header{height:auto;min-height:70px;flex-wrap:wrap;gap:0;padding:9px 0}
+  .mobile-menu-toggle{display:flex;width:42px;height:42px;flex:0 0 42px;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #344139;border-radius:10px;background:#101713;cursor:pointer}
+  .mobile-menu-toggle span{display:block;width:19px;height:2px;border-radius:2px;background:var(--lime);transition:transform .18s ease,opacity .18s ease}
+  .site-header.menu-open .mobile-menu-toggle span:first-child{transform:translateY(7px) rotate(45deg)}
+  .site-header.menu-open .mobile-menu-toggle span:nth-child(2){opacity:0}
+  .site-header.menu-open .mobile-menu-toggle span:last-child{transform:translateY(-7px) rotate(-45deg)}
+  .site-nav{display:none;position:absolute;top:calc(100% + 1px);left:0;right:0;z-index:50;padding:12px;background:#101713;border:1px solid #344139;border-radius:0 0 14px 14px;box-shadow:0 18px 35px #000b;flex-direction:column;align-items:stretch;gap:3px;font-size:14px}
+  .site-header.menu-open .site-nav{display:flex}
+  .site-nav>a{display:block!important;padding:11px 12px;border-radius:8px;white-space:normal}
+  .site-nav>a:hover{background:#1b281c}
+  .site-nav .home-cta{display:flex!important;width:100%;justify-content:center;margin-top:7px;padding:13px}
+  .site-nav .nav-dropdown{width:100%}
+  .site-nav .nav-dropdown-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;padding:12px;border-radius:8px;font-size:14px}
+  .site-nav .nav-dropdown-toggle:hover{background:#1b281c}
+  .site-nav .nav-dropdown-menu{display:none;position:static;left:auto;right:auto;min-width:0;width:100%;margin:0 0 5px;padding:5px;background:#0b110d;border:1px solid #29372d;border-radius:9px;box-shadow:none}
+  .site-nav .nav-dropdown.open .nav-dropdown-menu{display:grid}
+  .site-nav .nav-dropdown-menu a{padding:10px 12px}
+}
+
+</style>
+<meta name="description" content="Jogue com os amigos: leilão de craques atuais e lendas com lances ao vivo e o Dado da Copa, que sorteia seleções e monta seu time para ser campeão do mundo. Grátis, direto no navegador.">
+<link rel="canonical" href="{{SITE}}/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Resenha do Fut"><meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Resenha do Fut — Leilão de craques e Dado da Copa de futebol"><meta property="og:description" content="Jogue com os amigos: leilão de craques atuais e lendas com lances ao vivo e o Dado da Copa, que sorteia seleções e monta seu time para ser campeão do mundo. Grátis, direto no navegador."><meta property="og:url" content="{{SITE}}/">
+<meta property="og:image" content="{{SITE}}/og-image.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Resenha do Fut: futebol é melhor na resenha">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Resenha do Fut — Leilão de craques e Dado da Copa de futebol"><meta name="twitter:description" content="Jogue com os amigos: leilão de craques atuais e lendas com lances ao vivo e o Dado da Copa, que sorteia seleções e monta seu time para ser campeão do mundo. Grátis, direto no navegador."><meta name="twitter:image" content="{{SITE}}/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"{{SITE}}/#site","name":"Resenha do Fut","url":"{{SITE}}/","inLanguage":"pt-BR","description":"Jogue com os amigos: leilão de craques atuais e lendas com lances ao vivo e o Dado da Copa, que sorteia seleções e monta seu time para ser campeão do mundo. Grátis, direto no navegador."},{"@type":"Organization","@id":"{{SITE}}/#org","name":"Resenha do Fut","url":"{{SITE}}/","logo":"{{SITE}}/logo.png"}]}</script>
+</head>
+<body>
+<main class="app" id="top">
+<header class="site-header">
+<a class="site-brand" href="/" aria-label="Resenha do Fut - início"><img class="site-brand-icon" src="/logo.png" alt="Logo Resenha do Fut"><span class="site-brand-name">RESENHA<br><span>DO FUT.</span></span></a>
+<button class="mobile-menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="site-navigation"><span></span><span></span><span></span></button>
+<nav class="site-nav" id="site-navigation" aria-label="Navegação principal">
+<a href="/#jogos">Jogos</a>
+<div class="nav-dropdown"><button class="nav-dropdown-toggle" type="button" aria-expanded="false">Sobre os jogos <span aria-hidden="true">⌄</span></button><div class="nav-dropdown-menu">
+<a href="/jogos/leilao-de-futebol">Leilão de Futebol</a><a href="/jogos/dado-da-copa">Dado da Copa</a><a href="/jogos/resenha-ball">Resenha Ball</a><a href="/jogos/resenha-x">Resenha Chess</a><a href="/jogos/resenha-scout">Resenha Scout</a><a href="/jogos/resenha-manager">Resenha Manager <small>EM BREVE</small></a>
+</div></div>
+<a href="/plataforma">A plataforma</a><a href="/sobre">Sobre</a>
+<div class="nav-dropdown"><button class="nav-dropdown-toggle" type="button" aria-expanded="false">Ranking <span aria-hidden="true">⌄</span></button><div class="nav-dropdown-menu"><a href="/ranking">Ver ranking</a><a href="/ranking/como-funciona">Como funciona</a></div></div>
+<a class="home-cta" data-account-link href="/conta">Criar conta</a>
+</nav></header>
+<section class="wrap hero">
+<div class="eyebrow"><span class="dot"></span> Futebol é melhor na resenha</div>
+<h1>Monte seu time.<br><span>Vença a resenha.</span></h1>
+<p>Chame os amigos, dispute craques no leilão e encare desafios de futebol. Aqui, a paixão pelo jogo vira competição.</p>
+<div class="hero-actions"><a class="primary" href="#jogos">Explorar os jogos <span aria-hidden="true">↘</span></a><a class="secondary" href="#extras">Conhecer a plataforma</a></div>
+<div class="stats"><div class="stat"><strong>144</strong><span>Craques no leilão</span></div><div class="stat"><strong>2–8</strong><span>Jogadores por sala</span></div><div class="stat"><strong>∞</strong><span>Resenhas com amigos</span></div></div>
+</section>
+<section class="wrap activity-panel" aria-label="Movimento da comunidade">
+  <div>
+    <div class="activity-title"><span class="activity-live-dot" aria-hidden="true"></span> A resenha está rolando</div>
+    <div class="activity-status" data-resenha-online-status aria-live="polite">Conectando à resenha…</div>
+  </div>
+  <div class="activity-metrics">
+    <div class="activity-metric"><strong data-resenha-online-count>—</strong><span>torcedores online</span></div>
+    <div class="activity-metric"><strong data-resenha-daily-count>—</strong><span>partidas online hoje</span></div>
+  </div>
+</section>
+<section class="wrap section" id="jogos">
+<div class="section-head"><div><div class="kicker">Escolha sua disputa</div><h2>Qual vai ser a resenha de hoje?</h2><p>Do confronto com a galera ao desafio solo.</p></div></div>
+<div class="games">
+<article class="game"><div class="game-content"><div class="game-top"><span class="pill">✦ Multiplayer</span><div class="game-icon" aria-hidden="true">⚽</div></div><h3>Leilão de Futebol</h3><p>Dê seus lances nos craques, monte um elenco dos sonhos e prove que você entende de bola.</p><div class="meta"><span>♟ 2 a 8 jogadores</span><span>▦ 144 craques</span><span>⚙ Regras ajustáveis</span></div><a class="primary" href="/leilao">Entrar no leilão <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>ESTRATÉGIA · DISPUTA · AMIZADE</span><span>01 / 05</span></div></article>
+<article class="game alt"><div class="game-content"><div class="game-top"><span class="pill">◉ Desafio solo</span><div class="game-icon" aria-hidden="true">🎲</div></div><h3>Dado da Copa</h3><p>Role o dado, descubra as seleções sorteadas, escale seus craques e tente conquistar a Copa.</p><div class="meta"><span>♙ Um jogador</span><span>🏆 Copa simulada</span><span>🎯 Desafio diário</span></div><a class="primary" href="/dado">Jogar desafio <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>SORTEIO · ESCALAÇÃO · GLÓRIA</span><span>02 / 05</span></div></article>
+<article class="game"><div class="game-content"><div class="game-top"><span class="pill">✦ Multiplayer + Bots</span><div class="game-icon" aria-hidden="true">⚽</div></div><h3>Resenha Ball</h3><p>Entre em campo em partidas rápidas de futebol arcade. Jogue contra bots ou crie uma sala para desafiar seus amigos em até 4 contra 4.</p><div class="meta"><span>♟ 1 a 8 jogadores</span><span>⚡ Física em tempo real</span><span>🤝 Salas privadas</span></div><a class="primary" href="/resenha-ball">Jogar Resenha Ball <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>HABILIDADE · VELOCIDADE · GOLS</span><span>03 / 04</span></div></article>
+<article class="game alt"><div class="game-content"><div class="game-top"><span class="pill">✦ Estratégia + Bots</span><div class="game-icon" aria-hidden="true">♟</div></div><h3>Resenha Chess</h3><p>O xadrez com a identidade do futebol. Escolha seu clube, entre no tabuleiro e desafie bots em diferentes dificuldades.</p><div class="meta"><span>♟ 3 dificuldades</span><span>🎓 Treinamento</span><span>🏟️ Estádios temáticos</span></div><a class="primary" href="/resenha-x">Jogar Resenha Chess <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>ESTRATÉGIA · RACIOCÍNIO · RESENHA</span><span>04 / 04 · NOVO</span></div></article>
+
+
+</div>
+</section>
+<section class="wrap section exclusive-section" id="jogos-exclusivos">
+<div class="section-head"><div><div class="kicker">Área de membros</div><h2>Desafios exclusivos para cadastrados</h2><p>Crie sua conta gratuita para participar, registrar seu desempenho e disputar os desafios da comunidade.</p></div><span class="pill">Cadastro gratuito</span></div>
+<div class="games exclusive-grid">
+<article class="game"><div class="game-content"><div class="game-top"><span class="pill">◉ Desafio diário · Requer login</span><div class="game-icon" aria-hidden="true">🔎</div></div><h3>Resenha Scout</h3><p>Descubra uma lenda ou um craque do futebol usando seis pistas progressivas. O mesmo mistério para toda a comunidade a cada dia.</p><div class="meta"><span>♙ Um jogador</span><span>💡 6 pistas</span><span>🏆 XP diário</span></div><a class="primary" href="/scout">Entrar no Resenha Scout <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>MEMÓRIA · CONHECIMENTO · FUTEBOL</span><span>01 / 02</span></div></article>
+<article class="game alt"><div class="game-content"><div class="game-top"><span class="pill">◉ Crava · Requer login</span><div class="game-icon" aria-hidden="true">🎯</div></div><h3>Crava</h3><p>Mostre que entende de futebol: dê seus palpites nos placares, some pontos por acertos e dispute o ranking exclusivo da comunidade.</p><div class="meta"><span>⚽ Brasileirão</span><span>📊 Pontuação por rodada</span><span>🏆 Ranking exclusivo</span></div><a class="primary" href="/crava">Jogar Crava <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>ANÁLISE · PALPITE · COMPETIÇÃO</span><span>02 / 02</span></div></article>
+<article class="game manager"><div class="game-content manager-layout"><div><div class="game-top"><span class="pill">✦ Requer login · Em breve</span><div class="game-icon" aria-hidden="true">🏆</div></div><h3>Resenha Manager</h3><p>Assuma o comando de um clube, monte sua escalação, negocie jogadores e dispute temporadas. Comece sua carreira solo ou enfrente os amigos em ligas privadas.</p><div class="meta"><span>♟ Carreira individual</span><span>⇄ Mercado de transferências</span><span>🏆 Ligas online</span></div><a class="primary manager-soon" href="/manager">Conheça o projeto <span aria-hidden="true">→</span></a></div><div class="manager-preview" aria-label="Prévia ilustrativa do painel do manager"><div class="manager-metric"><span>Elenco</span><strong>25</strong></div><div class="manager-metric"><span>Orçamento</span><strong>R$ 42M</strong></div><div class="manager-metric"><span>Forma</span><strong>82%</strong></div><div class="manager-bars" aria-hidden="true"><i style="height:42%"></i><i style="height:58%"></i><i style="height:48%"></i><i style="height:75%"></i><i style="height:62%"></i><i style="height:92%"></i><i style="height:70%"></i><i style="height:100%"></i><i style="height:78%"></i><i style="height:88%"></i><i style="height:60%"></i><i style="height:82%"></i></div></div></div><div class="game-foot"><span>GESTÃO · TÁTICA · CAMPEONATOS</span><span>03 / 04 · EM BREVE</span></div></article>
+<article class="game alt"><div class="game-content"><div class="game-top"><span class="pill">✦ Anfitrião com login · convidados livres</span><div class="game-icon" aria-hidden="true">🔤</div></div><h3>Resenha Stop</h3><p>Reúna os amigos em uma sala privada, sorteie uma letra e dispute respostas no Stop Clássico ou no Stop Futebol.</p><div class="meta"><span>♟ 2 a 8 jogadores</span><span>🔤 2 estilos de jogo</span><span>🏁 Rodadas e pontuação</span></div><a class="primary" href="/resenha-stop">Jogar Resenha Stop <span aria-hidden="true">→</span></a></div><div class="game-foot"><span>AGILIDADE · CONHECIMENTO · AMIZADE</span><span>04 / 04 · NOVO</span></div></article>
+
+</div>
+</section>
+<section class="wrap section" id="extras"><div class="section-head"><div><div class="kicker">A casa do torcedor</div><h2>O futebol é o jogo. A resenha é o que vale.</h2><p>Escolha como quer participar: entre em campo, teste seus conhecimentos ou desafie os amigos.</p></div></div>
+<div class="tools"><article class="tool"><div class="tool-icon" aria-hidden="true">⚽</div><div><h3>Jogue do seu jeito</h3><p>Participe de disputas multiplayer, encare desafios individuais e descubra diferentes maneiras de curtir o futebol.</p></div></article><article class="tool"><div class="tool-icon" aria-hidden="true">🎯</div><div><h3>Mostre o que você sabe</h3><p>Teste sua memória futebolística, arrisque seus palpites e coloque seu conhecimento à prova em novos desafios.</p></div></article><article class="tool"><div class="tool-icon" aria-hidden="true">🤝</div><div><h3>Chame os amigos para a resenha</h3><p>Crie disputas, compartilhe partidas e transforme a paixão pelo futebol em diversão com a galera.</p></div></article></div>
+</section>
+<section class="wrap" id="sobre"><div class="community"><div><h2>Seu próximo clássico começa aqui.</h2><p>Escolha o jogo, convoque os amigos e deixe a resenha rolar.</p></div><a href="#jogos">BORA JOGAR ↗</a></div></section>
+<footer class="wrap footer"><span><strong>RESENHA DO FUT.</strong> — Futebol, dados e diversão.</span><span>Feito para quem nunca para de falar de futebol.</span></footer>
+</main>
+<script>(()=>{const header=document.querySelector('.site-header');const menuButton=document.querySelector('.mobile-menu-toggle');const siteNav=document.querySelector('.site-nav');if(header&&menuButton&&siteNav){menuButton.addEventListener('click',()=>{const open=header.classList.toggle('menu-open');menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Fechar menu':'Abrir menu')});siteNav.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{header.classList.remove('menu-open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Abrir menu')}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){header.classList.remove('menu-open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Abrir menu')}})};document.querySelectorAll('.nav-dropdown').forEach(d=>{const b=d.querySelector('.nav-dropdown-toggle');if(!b)return;b.addEventListener('click',()=>{const open=d.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});document.addEventListener('click',e=>{if(!d.contains(e.target)){d.classList.remove('open');b.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'){d.classList.remove('open');b.setAttribute('aria-expanded','false');b.focus()}})})})();</script><script src="/nav.js" defer></script>
+</body>
+</html>
