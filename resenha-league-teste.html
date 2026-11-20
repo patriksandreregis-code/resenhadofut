@@ -51,6 +51,7 @@ button{border:1px solid #405342;border-radius:9px;background:#1a281d;color:var(-
 <div id="playerList" class="players"></div>
 <div id="roomStatus" class="status">Aguardando participantes…</div>
 <div class="actions" id="hostActions"><button class="primary" id="startBtn">Preparar próxima etapa</button></div>
+<div class="actions"><button id="simulateAuctionBtn" type="button">⚡ Simular fim do leilão (teste rápido)</button></div><p class="hint">Atalho exclusivo do laboratório: cria quatro equipes fictícias e abre o campeonato sem realizar o leilão.</p>
 <div class="actions" id="auctionActions" hidden><button class="primary" id="auctionBtn">Entrar no leilão de jogadores ↗</button></div>
 <p class="hint">O leilão usa os jogadores e as regras do Leilão atual. Esta sala é marcada como teste: não concede XP nem altera o ranking oficial.</p>
 </section>
@@ -121,6 +122,7 @@ $('joinBtn').onclick=()=>join();
 $('refreshBtn').onclick=()=>send({t:'list'});
 $('leaveBtn').onclick=()=>send({t:'leave'});
 $('startBtn').onclick=()=>send({t:'start'});
+$('simulateAuctionBtn').onclick=()=>{if(confirm('Criar um campeonato de demonstração com 4 equipes fictícias, sem realizar o leilão?'))send({t:'simulate-auction'});};
 $('auctionBtn').onclick=()=>{if(currentState&&currentState.auctionUrl)window.open(currentState.auctionUrl,'_blank','noopener');};
 $('copyBtn').onclick=async()=>{const url=location.origin+'/resenha-league-teste';const txt='Vamos jogar Resenha League! Código: '+myRoom.code+' — '+url;try{await navigator.clipboard.writeText(txt);showError('Convite copiado!');}catch{prompt('Copie o convite:',txt);}};
 $('shareBtn').onclick=()=>{const txt='Vamos jogar Resenha League! Entre no laboratório e use o código '+myRoom.code+': '+location.origin+'/resenha-league-teste';window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');};
