@@ -282,7 +282,20 @@ async function fetchPlayerPhoto(name) {
       const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
       if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
       const data = await lookup.json();
-      const player = (data.player || []).find(item => photoNameKey(item.strPlayer) === key && (item.strCutout || item.strThumb));
+      const candidates = (data.player || []).filter(item => item.strPlayer && (item.strCutout || item.strThumb));
+      // Prioriza o nome completo. Se o elenco usar apenas um sobrenome/apelido,
+      // aceita a correspondência por palavra somente quando houver um único atleta.
+      let player = candidates.find(item => photoNameKey(item.strPlayer) === key);
+      if (!player) {
+        const wantedTokens = String(name).toLocaleLowerCase('pt-BR').normalize('NFD')
+          .replace(/[\\u0300-\\u036f]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+        const matches = candidates.filter(item => {
+          const playerTokens = String(item.strPlayer).toLocaleLowerCase('pt-BR').normalize('NFD')
+            .replace(/[\\u0300-\\u036f]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+          return wantedTokens.length > 0 && wantedTokens.every(token => playerTokens.includes(token));
+        });
+        if (matches.length === 1) player = matches[0];
+      }
       if (!player) {
         const miss = { status: 404, expires: Date.now() + 6 * 3600e3 };
         playerPhotoCache.set(key, miss); return miss;
