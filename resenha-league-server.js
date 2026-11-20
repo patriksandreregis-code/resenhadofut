@@ -28,7 +28,7 @@ function publicRooms() {
     .map(r => ({ code:r.code, title:r.title, host:r.players.find(p=>p.id===r.host)?.name || 'Anfitrião', players:r.players.length, maxPlayers:MAX_PLAYERS }));
 }
 function state(room, player) {
-  return { t:'state', room:{ code:room.code, title:room.title, visibility:room.visibility, phase:room.phase,
+  return { t:'state', tournament: room.tournament || null, room:{ code:room.code, title:room.title, visibility:room.visibility, phase:room.phase,
     host:room.host, players:room.players.map(p=>({id:p.id,name:p.name,on:!!p.ws})), maxPlayers:MAX_PLAYERS },
     you:player && player.id, isHost:!!(player && player.id===room.host),
     auctionUrl: room.phase === 'auction-ready' && room.auctionCode && player ? '/leilao?sala=' + encodeURIComponent(room.auctionCode) + '&nome=' + encodeURIComponent(player.name) + '&league=1' : null };
@@ -44,6 +44,17 @@ let auctionBridge = null;
 function setAuctionBridge(createRoom) {
   if (typeof createRoom !== 'function') throw new TypeError('A ponte do leilão precisa ser uma função.');
   auctionBridge = createRoom;
+}
+function auctionFinished(code, teams) {
+  const room = rooms.get(String(code || '').toUpperCase());
+  if (!room || room.phase !== 'auction-ready' || room.tournament) return false;
+  const valid = (teams || []).filter(t => t && t.id && t.name && Array.isArray(t.lineup) && t.lineup.length);
+  if (valid.length < 2) { room.phase = 'auction-incomplete'; room.tournamentError = 'São necessários pelo menos dois elencos com jogadores.'; broadcast(room); return false; }
+  const build = require('./resenha-league-tournament.js');
+  room.tournament = build.createTournament(valid, room.code);
+  room.phase = 'championship-ready';
+  broadcast(room);
+  return true;
 }
 function connect(ws, req) {
   if (!authorized(req)) { ws.close(1008, 'Acesso restrito ao laboratório'); return; }
@@ -113,4 +124,4 @@ function connect(ws, req) {
     if(!room.players.length)rooms.delete(room.code);else broadcast(room);
   });
 }
-module.exports={connect,setAuctionBridge};
+module.exports={connect,setAuctionBridge,auctionFinished};

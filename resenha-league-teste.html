@@ -17,7 +17,7 @@ h1,h2{margin:0;font-family:'Arial Narrow',Impact,sans-serif;letter-spacing:-.5px
 label{display:block;font-size:12px;font-weight:800;color:#dce6dd;margin:14px 0 6px}input,select{width:100%;border:1px solid #3a4b3d;background:#080e0a;color:var(--text);border-radius:9px;padding:12px;font:inherit;outline:none}input:focus,select:focus{border-color:var(--lime)}
 button{border:1px solid #405342;border-radius:9px;background:#1a281d;color:var(--text);padding:11px 14px;font-weight:800;cursor:pointer}button:hover{border-color:var(--lime)}button.primary{background:var(--lime);border-color:var(--lime);color:#14200d}button:disabled{opacity:.4;cursor:not-allowed}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.muted{color:var(--muted)}.hint{font-size:12px;color:var(--muted);margin-top:8px}.room-list{display:grid;gap:10px;margin-top:15px}.room-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#0c130e}.room-card b{display:block}.room-card small{color:var(--muted)}.empty{border:1px dashed #405342;border-radius:11px;padding:22px;text-align:center;color:var(--muted);margin-top:15px}
-#roomView{margin-top:18px}.room-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.code{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--lime)}.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}.player{padding:14px;background:#0b130d;border:1px solid var(--line);border-radius:10px}.crown{color:var(--lime);font-size:11px;font-weight:900}.status{padding:12px;border-radius:10px;background:#18291b;color:#cce8c8;font-size:13px;margin-top:14px}.error{color:var(--red);min-height:22px;font-size:13px;margin-top:10px}.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}
+#roomView{margin-top:18px}.tournament{margin-top:18px}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--muted);font-size:11px}.fixture-list{display:grid;gap:8px;margin-top:12px}.fixture{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:9px;background:#0b130d}.fixture small{color:var(--muted)}.room-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.code{font-size:24px;font-weight:900;letter-spacing:4px;color:var(--lime)}.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}.player{padding:14px;background:#0b130d;border:1px solid var(--line);border-radius:10px}.crown{color:var(--lime);font-size:11px;font-weight:900}.status{padding:12px;border-radius:10px;background:#18291b;color:#cce8c8;font-size:13px;margin-top:14px}.error{color:var(--red);min-height:22px;font-size:13px;margin-top:10px}.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:16px}
 [hidden]{display:none!important}
 @media(max-width:760px){.grid{grid-template-columns:1fr}main{margin-top:24px}.panel{padding:17px}header{height:68px}}
 </style>
@@ -54,6 +54,7 @@ button{border:1px solid #405342;border-radius:9px;background:#1a281d;color:var(-
 <div class="actions" id="auctionActions" hidden><button class="primary" id="auctionBtn">Entrar no leilão de jogadores ↗</button></div>
 <p class="hint">O leilão usa os jogadores e as regras do Leilão atual. Esta sala é marcada como teste: não concede XP nem altera o ranking oficial.</p>
 </section>
+<section id="tournamentView" class="panel tournament" hidden><div class="eyebrow">Competição criada</div><h2>Campeonato Resenha League</h2><p class="muted" id="tournamentSummary"></p><h2 style="margin-top:20px">Classificação</h2><div class="table-wrap"><table><thead><tr><th>#</th><th>Time</th><th>Pts</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th></tr></thead><tbody id="standingsBody"></tbody></table></div><h2 style="margin-top:22px">Calendário — pontos corridos</h2><div id="fixturesList" class="fixture-list"></div><p class="hint">Os resultados ainda não são simulados nesta etapa. A próxima entrega conectará cada confronto ao motor de partidas táticas ao vivo.</p></section>
 <div class="error" id="error" role="status" aria-live="polite"></div>
 </main>
 <script>
@@ -68,7 +69,7 @@ function connect(){
  ws.onopen=()=>{showError('');$('roomList').innerHTML='<div class="empty">Carregando salas públicas…</div>';ws.send(JSON.stringify({t:'list'}));};
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
   if(m.t==='rooms')renderRooms(m.rooms||[]);
-  if(m.t==='state'){currentState=m;myRoom=m.room;myId=m.you;renderRoom();}
+  if(m.t==='state'){currentState=m;myRoom=m.room;myId=m.you;renderRoom();renderTournament(m.tournament);}
   if(m.t==='left'){myRoom=null;myId=null;currentState=null;$('roomView').hidden=true;$('lobbyHome').hidden=false;ws.send(JSON.stringify({t:'list'}));}
   if(m.t==='error')showError(m.message);
  };
@@ -91,6 +92,12 @@ function join(code){
  const name=$('playerName').value.trim();if(!name){$('playerName').focus();return showError('Informe seu nome ou apelido antes de entrar.');}
  myName=name;send({t:'join',name,code:code||$('joinCode').value.trim().toUpperCase()});
 }
+function renderTournament(t){
+ const box=$('tournamentView');if(!t){box.hidden=true;return;}box.hidden=false;
+ $('tournamentSummary').textContent=t.teams.length+' equipes · '+t.rounds.length+' rodadas · '+t.matches.length+' partidas na fase de pontos corridos. Os 4 melhores avançam ao mata-mata.';
+ $('standingsBody').innerHTML=t.standings.map((r,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+escapeHtml(r.name)+'</b></td><td>'+r.pts+'</td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+r.sg+'</td></tr>').join('');
+ $('fixturesList').innerHTML=t.rounds.map((round,i)=>'<div class="fixture"><div><b>Rodada '+(i+1)+'</b><br><small>'+round.length+' confronto(s)</small></div><div style="text-align:right">'+round.map(id=>{const m=t.matches.find(x=>x.id===id);return '<div>'+escapeHtml(m.homeName)+' <b>×</b> '+escapeHtml(m.awayName)+'</div>';}).join('')+'</div></div>').join('');
+}
 function renderRoom(){
  if(!myRoom)return;
  $('lobbyHome').hidden=true;$('roomView').hidden=false;
@@ -109,7 +116,7 @@ $('joinBtn').onclick=()=>join();
 $('refreshBtn').onclick=()=>send({t:'list'});
 $('leaveBtn').onclick=()=>send({t:'leave'});
 $('startBtn').onclick=()=>send({t:'start'});
-$('auctionBtn').onclick=()=>{if(currentState&&currentState.auctionUrl)location.href=currentState.auctionUrl;};
+$('auctionBtn').onclick=()=>{if(currentState&&currentState.auctionUrl)window.open(currentState.auctionUrl,'_blank','noopener');};
 $('copyBtn').onclick=async()=>{const url=location.origin+'/resenha-league-teste';const txt='Vamos jogar Resenha League! Código: '+myRoom.code+' — '+url;try{await navigator.clipboard.writeText(txt);showError('Convite copiado!');}catch{prompt('Copie o convite:',txt);}};
 $('shareBtn').onclick=()=>{const txt='Vamos jogar Resenha League! Entre no laboratório e use o código '+myRoom.code+': '+location.origin+'/resenha-league-teste';window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');};
 $('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
