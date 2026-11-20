@@ -24,7 +24,11 @@
       .site-nav .nav-dropdown-menu a{padding:10px 12px!important}
     }
   `;
-  document.head.appendChild(mobileStyle);
+  mobileStyle.textContent += `
+    .install-app-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 13px;border:1px solid #526d42;border-radius:9px;background:#192718;color:#a8ff3f;font:inherit;font-weight:800;white-space:nowrap;cursor:pointer}
+    .install-app-link:hover{background:#24351e;border-color:#a8ff3f}
+    @media(max-width:760px){.site-nav .install-app-link{display:flex;width:100%;justify-content:flex-start;padding:12px!important;margin-top:5px;font-size:14px!important}}
+`;\n  document.head.appendChild(mobileStyle);
 
   const header = document.querySelector('.site-header');
   const siteNav = header && header.querySelector('.site-nav');
@@ -73,7 +77,55 @@
     gamesMenu.appendChild(stopLink);
   }
 
-  const accountLink = document.querySelector('[data-account-link]');
+
+  // Instalação do Resenha do Fut (PWA), disponível em todas as páginas.
+  let deferredInstallPrompt = null;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+  });
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(error => {
+        console.warn('Não foi possível registrar o aplicativo:', error);
+      });
+    }, { once: true });
+  }
+
+  if (siteNav && !siteNav.querySelector('.install-app-link')) {
+    const installButton = document.createElement('button');
+    installButton.type = 'button';
+    installButton.className = 'install-app-link';
+    installButton.innerHTML = '<span aria-hidden="true">⬇</span> Instalar aplicativo';
+    installButton.addEventListener('click', async () => {
+      if (isStandalone) {
+        window.alert('O Resenha do Fut já está instalado neste dispositivo.');
+        return;
+      }
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        return;
+      }
+      if (isIOS) {
+        window.alert('Para instalar o Resenha do Fut no iPhone ou iPad:\\n\\n1. Toque no botão Compartilhar do Safari.\\n2. Escolha “Adicionar à Tela de Início”.\\n3. Confirme em “Adicionar”.');
+        return;
+      }
+      window.alert('Para instalar o Resenha do Fut:\\n\\nAbra o menu do navegador (⋮) e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”. Se a opção não aparecer, atualize a página e tente novamente.');
+    });
+    siteNav.appendChild(installButton);
+  }
+\n  const accountLink = document.querySelector('[data-account-link]');
 
   const updateLabel = (session) => {
     if (accountLink) accountLink.textContent = session && session.user ? 'Minha conta' : 'Criar conta';
