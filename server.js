@@ -286,20 +286,18 @@ const SEC = {
 };
 const siteOf = q => SITE_URL || (String(q.headers['x-forwarded-proto'] || 'http').split(',')[0] + '://' + q.headers.host);
 
-// Fotos dos jogadores: consulta sob demanda no TheSportsDB e mantém cache em memória.
-// A busca só aceita correspondência exata do nome para evitar exibir a foto de outro atleta.
+// Fotos dos jogadores: API-Football como fonte principal, com validação rigorosa de identidade.
+// A chave fica somente no servidor; o navegador nunca recebe o segredo.
 const playerPhotoCache = new Map(), playerPhotoPending = new Map();
 let playerPhotoNextLookupAt = 0;
-// O plano gratuito do TheSportsDB permite 30 buscas por minuto.
-// Espaça as consultas para manter o uso abaixo do limite, mesmo com vários cartões carregando juntos.
 async function waitForPlayerPhotoLookupSlot() {
   const now = Date.now();
   const slot = Math.max(now, playerPhotoNextLookupAt);
-  playerPhotoNextLookupAt = slot + 2200;
+  playerPhotoNextLookupAt = slot + 1800;
   const delay = slot - now;
   if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
 }
-const photoNameKey = value => String(value || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+const photoNameKey = value => String(value || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 async function fetchPlayerPhoto(name) {
   const key = photoNameKey(name);
   if (!key) return null;
@@ -308,12 +306,13 @@ async function fetchPlayerPhoto(name) {
   if (playerPhotoPending.has(key)) return playerPhotoPending.get(key);
   const pending = (async () => {
     try {
-      // Para nomes curtos/ambíguos, consulta o nome completo e exige identificação segura.
+      const apiToken = process.env.API_FOOTBALL_TOKEN;
+      if (!apiToken) throw new Error('API_FOOTBALL_TOKEN não configurada no servidor');
       const photoAliases = {
         saka: { search: 'Bukayo Saka', accepted: ['bukayosaka'] },
         donnarumma: { search: 'Gianluigi Donnarumma', accepted: ['gianluigidonnarumma'] },
         rivellino: { search: 'Roberto Rivellino', accepted: ['robertorivellino', 'rivelino', 'rivellino'] },
-        zico: { search: 'Arthur Antunes Coimbra', accepted: ['arthurantunescoimbra', 'zico'] },
+        zico: { search: 'Zico', accepted: ['zico', 'arthurantunescoimbra'] },
         kane: { search: 'Harry Kane', accepted: ['harrykane'] },
         raya: { search: 'David Raya', accepted: ['davidraya'] },
         musiala: { search: 'Jamal Musiala', accepted: ['jamalmusiala'] },
@@ -321,57 +320,48 @@ async function fetchPlayerPhoto(name) {
         yamal: { search: 'Lamine Yamal', accepted: ['lamineyamal'] }
       };
       const alias = photoAliases[key];
-      const searchName = alias ? alias.search : name;
+      const searchName = alias ? alias.search : String(name).trim();
+      if (searchName.length < 4) throw new Error('Nome muito curto para uma busca segura');
       await waitForPlayerPhotoLookupSlot();
-      let lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(10000) });
-      if (lookup.status === 429) {
-        const retryAfter = Number(lookup.headers.get('retry-after'));
-        const retryDelay = Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 120000) : 65000;
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        await waitForPlayerPhotoLookupSlot();
-        lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(10000) });
-      }
-      if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
+      const endpoint = 'https://v3.football.api-sports.io/players/profiles?search=' + encodeURIComponent(searchName);
+      const lookup = await fetch(endpoint, {
+        headers: { 'x-apisports-key': apiToken },
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!lookup.ok) throw new Error('API-Football HTTP ' + lookup.status);
       const data = await lookup.json();
-      const candidates = (data.player || []).filter(item => item.strPlayer && (item.strCutout || item.strThumb));
-      let player;
-      if (alias) {
-        player = candidates.find(item => {
-          const names = [item.strPlayer, item.strPlayerAlternate || '']
-            .flatMap(value => String(value).split(/[,;|/]/))
-            .map(photoNameKey).filter(Boolean);
-          return names.some(candidate => alias.accepted.includes(candidate));
-        });
-      } else {
-        // Para os demais nomes, mantém correspondência exata e só aceita sobrenome
-        // quando houver um único atleta possível.
-        player = candidates.find(item => photoNameKey(item.strPlayer) === key);
-        if (!player) {
-          const wantedTokens = String(name).trim().split(' ').map(photoNameKey).filter(Boolean);
-          const matches = candidates.filter(item => {
-            const playerTokens = String(item.strPlayer).trim().split(' ').map(photoNameKey).filter(Boolean);
-            return wantedTokens.length > 0 && wantedTokens.every(token => playerTokens.includes(token));
-          });
-          if (matches.length === 1) player = matches[0];
-        }
-      }
-      if (!player) {
-        const miss = { status: 404, expires: Date.now() + 6 * 3600e3 };
+      if (data.errors && Object.keys(data.errors).length) throw new Error('API-Football: ' + JSON.stringify(data.errors));
+      const candidates = (data.response || []).map(item => item.player).filter(player => player && player.id && player.photo);
+      const accepted = alias ? alias.accepted : [key];
+      const exact = candidates.filter(player => {
+        const fullNames = [player.name, [player.firstname, player.lastname].filter(Boolean).join(' ')]
+          .map(photoNameKey).filter(Boolean);
+        if (fullNames.some(candidate => accepted.includes(candidate))) return true;
+        // Sobrenome isolado só é aceito se houver um único resultado com esse sobrenome.
+        return !alias && key.length >= 4 && photoNameKey(player.lastname) === key;
+      });
+      const unique = [...new Map(exact.map(player => [String(player.id), player])).values()];
+      if (unique.length !== 1) {
+        const miss = { status: 404, expires: Date.now() + 12 * 3600e3 };
         playerPhotoCache.set(key, miss); return miss;
       }
-      const imageUrl = player.strCutout || player.strThumb;
-      if (!/^https:\/\/([a-z0-9-]+\.)*thesportsdb\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
+      const player = unique[0];
+      const imageUrl = player.photo;
+      const parsedUrl = new URL(imageUrl);
+      if (parsedUrl.protocol !== 'https:' || parsedUrl.hostname !== 'media.api-sports.io' || !/^\/football\/players\/\d+\.png$/.test(parsedUrl.pathname)) {
+        throw new Error('URL de imagem da API-Football não permitida');
+      }
       const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
-      if (!response.ok) throw new Error('Imagem HTTP ' + response.status);
-      const type = response.headers.get('content-type') || 'image/jpeg';
+      if (!response.ok) throw new Error('Imagem API-Football HTTP ' + response.status);
+      const type = response.headers.get('content-type') || 'image/png';
       if (!type.startsWith('image/')) throw new Error('Resposta não é uma imagem');
       const bytes = Buffer.from(await response.arrayBuffer());
       if (!bytes.length || bytes.length > 4 * 1024 * 1024) throw new Error('Imagem fora do limite');
       const result = { status: 200, bytes, type, expires: Date.now() + 7 * 24 * 3600e3 };
       playerPhotoCache.set(key, result); return result;
     } catch (error) {
-      console.warn('[Foto jogador] ' + name + ':', error.message);
-      const cooldown = error && error.message && error.message.includes('HTTP 429') ? 60 * 1000 : 30 * 60e3;
+      console.warn('[Foto jogador/API-Football] ' + name + ':', error.message);
+      const cooldown = error && /HTTP 429|rate limit/i.test(error.message) ? 60 * 60e3 : 30 * 60e3;
       const miss = { status: 404, expires: Date.now() + cooldown };
       playerPhotoCache.set(key, miss); return miss;
     } finally { playerPhotoPending.delete(key); }
