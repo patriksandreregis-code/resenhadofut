@@ -57,7 +57,7 @@ header{padding:25px 0 18px;border-bottom:1px solid var(--line)}.eyebrow{color:va
    const img=card.querySelector('img'),state=card.querySelector('.photo-state');
    img.addEventListener('load',()=>{state.textContent='FOTO ENCONTRADA';});
    img.addEventListener('error',()=>{state.textContent='SEM IMAGEM';img.remove();});
-   card.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{marks[p.name]={status:btn.dataset.status};save();render();counts();}));
+   card.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{marks[p.name]={status:btn.dataset.status};save();card.querySelectorAll('.choice').forEach(b=>b.classList.toggle('active',b===btn));counts();}));
    grid.appendChild(card);
   }
   $('info').textContent='Exibindo '+list.length+' de '+players.length+' jogadores · as fotos são carregadas conforme aparecem na tela.';
