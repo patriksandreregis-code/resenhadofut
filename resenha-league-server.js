@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const rooms = new Map();
 const MAX_ROOMS = 100;
 const MAX_PLAYERS = 8;
-const ROOM_TTL = 30 * 60 * 1000;
 const send = (ws, data) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(data)); };
 const cleanName = value => String(value || '').trim().replace(/\s+/g, ' ').slice(0, 16);
 const validName = value => /^[\p{L}\p{N}][\p{L}\p{N} ._-]{1,15}$/u.test(value);
@@ -94,15 +93,10 @@ function connect(ws, req) {
   ws.on('close',()=>{
     clients.delete(ws);
     if(!currentRoom||!player)return;
-    const room=currentRoom;player.ws=null;
-    if(room.host===player.id){const next=room.players.find(p=>p.ws);room.host=next?.id||player.id;}
-    broadcast(room);
-    setTimeout(()=>{
-      if(rooms.get(room.code)!==room||player.ws)return;
-      room.players=room.players.filter(p=>p!==player);
-      if(!room.players.length)rooms.delete(room.code);
-      else {if(room.host===player.id)room.host=room.players[0]?.id||null;broadcast(room);}
-    },ROOM_TTL);
+    const room=currentRoom;
+    room.players=room.players.filter(p=>p!==player);
+    if(room.host===player.id)room.host=room.players[0]?.id||null;
+    if(!room.players.length)rooms.delete(room.code);else broadcast(room);
   });
 }
 module.exports={connect};
