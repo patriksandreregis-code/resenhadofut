@@ -309,15 +309,55 @@ async function fetchPlayerPhoto(name) {
       const apiToken = process.env.API_FOOTBALL_TOKEN;
       if (!apiToken) throw new Error('API_FOOTBALL_TOKEN não configurada no servidor');
       const photoAliases = {
+        // Nomes já revisados: buscar pelo nome completo evita confusão entre homônimos.
         saka: { search: 'Bukayo Saka', accepted: ['bukayosaka'] },
         donnarumma: { search: 'Gianluigi Donnarumma', accepted: ['gianluigidonnarumma'] },
         rivellino: { search: 'Roberto Rivellino', accepted: ['robertorivellino', 'rivelino', 'rivellino'] },
-        zico: { search: 'Zico', accepted: ['zico', 'arthurantunescoimbra'] },
+        zico: { search: 'Arthur Antunes Coimbra', accepted: ['zico', 'arthurantunescoimbra'] },
         kane: { search: 'Harry Kane', accepted: ['harrykane'] },
         raya: { search: 'David Raya', accepted: ['davidraya'] },
         musiala: { search: 'Jamal Musiala', accepted: ['jamalmusiala'] },
         maradona: { search: 'Diego Maradona', accepted: ['diegomaradona'] },
-        yamal: { search: 'Lamine Yamal', accepted: ['lamineyamal'] }
+        yamal: { search: 'Lamine Yamal', accepted: ['lamineyamal'] },
+        // Correções apontadas na auditoria de fotos.
+        gabriel: { search: 'Gabriel Magalhaes', accepted: ['gabrielmagalhaes'] },
+        araujo: { search: 'Ronald Araujo', accepted: ['ronaldaraujo'] },
+        valverde: { search: 'Federico Valverde', accepted: ['federicovalverde'] },
+        rice: { search: 'Declan Rice', accepted: ['declanrice'] },
+        cruyff: { search: 'Johan Cruyff', accepted: ['johancruyff'] },
+        raul: { search: 'Raul Gonzalez', accepted: ['raul', 'raul gonzalez', 'raulgonzalez'] },
+        suarez: { search: 'Luis Suarez', accepted: ['luissuarez'] },
+        dembele: { search: 'Ousmane Dembele', accepted: ['ousmanedembele'] },
+        plata: { search: 'Gonzalo Plata', accepted: ['gonzaloplata'] },
+        pedro: { search: 'Pedro Guilherme', accepted: ['pedroguilherme', 'pedroguilhermeabreu'] },
+        facundotorres: { search: 'Facundo Torres', accepted: ['facundotorres'] },
+        paulinho: { search: 'Paulo Henrique Sampaio Filho', accepted: ['paulinho', 'paulohenriquesampaiofilho'] },
+        fabio: { search: 'Fabio Deivson Lopes Maciel', accepted: ['fabio', 'fabiodeivsonlopesmaciel'] },
+        ignacio: { search: 'Ignacio da Silva', accepted: ['ignaciodasilva'] },
+        rene: { search: 'Rene Rodrigues Martins', accepted: ['renerodriguesmartins'] },
+        martinelli: { search: 'Matheus Martinelli', accepted: ['matheusmartinelli'] },
+        ronaldo: { search: 'Ronaldo Strada', accepted: ['ronaldostrada'] },
+        gilberto: { search: 'Gilberto Moraes Junior', accepted: ['gilbertomoraesjunior'] },
+        kahn: { search: 'Oliver Kahn', accepted: ['oliverkahn'] },
+        dida: { search: 'Nelson Dida', accepted: ['dida', 'nelsondida', 'nelsondejesussilva'] },
+        niltonsantos: { search: 'Nilton Santos', accepted: ['niltonsantos'] },
+        desailly: { search: 'Marcel Desailly', accepted: ['marceldesailly'] },
+        lucio: { search: 'Lucimar Ferreira da Silva', accepted: ['lucio', 'lucimarferreiradasilva'] },
+        vieira: { search: 'Patrick Vieira', accepted: ['patrickvieira'] },
+        rodri: { search: 'Rodrigo Hernandez', accepted: ['rodri', 'rodrigohernandezcascante'] },
+        pedri: { search: 'Pedri', accepted: ['pedri', 'pedrogonzalezlopez'] },
+        caicedo: { search: 'Moises Caicedo', accepted: ['moisescaicedo', 'moisescaicedocorozo'] },
+        pele: { search: 'Edson Arantes do Nascimento', accepted: ['pele', 'edsonarantesdonascimento'] },
+        ronaldofenomeno: { search: 'Ronaldo Nazario', accepted: ['ronaldonazario', 'ronaldoluisnazariodelima'] },
+        distefano: { search: 'Alfredo Di Stefano', accepted: ['alfredodistefano', 'alfredodistefanolaulhe'] },
+        eusebio: { search: 'Eusebio da Silva Ferreira', accepted: ['eusebio', 'eusebiosilvaferreira'] },
+        shevchenko: { search: 'Andriy Shevchenko', accepted: ['andriyshevchenko'] },
+        viniciusjr: { search: 'Vinicius Junior', accepted: ['viniciusjunior', 'viniciusjosepaixaodeoliveirajunior'] },
+        son: { search: 'Son Heung Min', accepted: ['sonheungmin'] },
+        yildiz: { search: 'Kenan Yildiz', accepted: ['kenanyildiz'] },
+        delacruz: { search: 'Nicolas de la Cruz', accepted: ['nicolasdelacruz'] },
+        flacolopez: { search: 'Jose Manuel Lopez', accepted: ['josemanuellopez', 'flacolopez'] },
+        hercules: { search: 'Hercules Pereira do Nascimento', accepted: ['herculespereiradonascimento'] }
       };
       const alias = photoAliases[key];
       const searchName = alias ? alias.search : String(name).trim();
