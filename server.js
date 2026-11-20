@@ -287,11 +287,9 @@ async function fetchPlayerPhoto(name) {
       // aceita a correspondência por palavra somente quando houver um único atleta.
       let player = candidates.find(item => photoNameKey(item.strPlayer) === key);
       if (!player) {
-        const wantedTokens = String(name).toLocaleLowerCase('pt-BR')
-          .split(/[^\\p{L}\\p{N}]+/u).map(photoNameKey).filter(Boolean);
+        const wantedTokens = String(name).trim().split(/\\s+/).map(photoNameKey).filter(Boolean);
         const matches = candidates.filter(item => {
-          const playerTokens = String(item.strPlayer).toLocaleLowerCase('pt-BR')
-            .split(/[^\\p{L}\\p{N}]+/u).map(photoNameKey).filter(Boolean);
+          const playerTokens = String(item.strPlayer).trim().split(/\\s+/).map(photoNameKey).filter(Boolean);
           return wantedTokens.length > 0 && wantedTokens.every(token => playerTokens.includes(token));
         });
         if (matches.length === 1) player = matches[0];
