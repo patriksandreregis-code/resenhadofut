@@ -270,6 +270,16 @@ const siteOf = q => SITE_URL || (String(q.headers['x-forwarded-proto'] || 'http'
 // Fotos dos jogadores: consulta sob demanda no TheSportsDB e mantém cache em memória.
 // A busca só aceita correspondência exata do nome para evitar exibir a foto de outro atleta.
 const playerPhotoCache = new Map(), playerPhotoPending = new Map();
+let playerPhotoNextLookupAt = 0;
+// O plano gratuito do TheSportsDB permite 30 buscas por minuto.
+// Espaça as consultas para manter o uso abaixo do limite, mesmo com vários cartões carregando juntos.
+async function waitForPlayerPhotoLookupSlot() {
+  const now = Date.now();
+  const slot = Math.max(now, playerPhotoNextLookupAt);
+  playerPhotoNextLookupAt = slot + 2200;
+  const delay = slot - now;
+  if (delay > 0) await new Promise(resolve => setTimeout(resolve, delay));
+}
 const photoNameKey = value => String(value || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 async function fetchPlayerPhoto(name) {
   const key = photoNameKey(name);
@@ -282,6 +292,7 @@ async function fetchPlayerPhoto(name) {
       // Para nomes curtos/ambíguos, consulta o nome completo e exige identificação segura.
       const photoAliases = {
         saka: { search: 'Bukayo Saka', accepted: ['bukayosaka'] },
+        donnarumma: { search: 'Gianluigi Donnarumma', accepted: ['gianluigidonnarumma'] },
         rivellino: { search: 'Roberto Rivellino', accepted: ['robertorivellino', 'rivelino', 'rivellino'] },
         zico: { search: 'Arthur Antunes Coimbra', accepted: ['arthurantunescoimbra', 'zico'] },
         kane: { search: 'Harry Kane', accepted: ['harrykane'] },
@@ -292,7 +303,15 @@ async function fetchPlayerPhoto(name) {
       };
       const alias = photoAliases[key];
       const searchName = alias ? alias.search : name;
-      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(6000) });
+      await waitForPlayerPhotoLookupSlot();
+      let lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(10000) });
+      if (lookup.status === 429) {
+        const retryAfter = Number(lookup.headers.get('retry-after'));
+        const retryDelay = Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 120000) : 65000;
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        await waitForPlayerPhotoLookupSlot();
+        lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(10000) });
+      }
       if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
       const data = await lookup.json();
       const candidates = (data.player || []).filter(item => item.strPlayer && (item.strCutout || item.strThumb));
@@ -333,7 +352,8 @@ async function fetchPlayerPhoto(name) {
       playerPhotoCache.set(key, result); return result;
     } catch (error) {
       console.warn('[Foto jogador] ' + name + ':', error.message);
-      const miss = { status: 404, expires: Date.now() + 30 * 60e3 };
+      const cooldown = error && error.message && error.message.includes('HTTP 429') ? 60 * 1000 : 30 * 60e3;
+      const miss = { status: 404, expires: Date.now() + cooldown };
       playerPhotoCache.set(key, miss); return miss;
     } finally { playerPhotoPending.delete(key); }
   })();
@@ -361,7 +381,7 @@ const server = http.createServer(async (q, s) => {
     try { playerName = decodeURIComponent(playerPhotoMatch[1]).slice(0, 80).trim(); } catch (e) {}
     if (!playerName || !/^[\p{L}\p{N} .’'\-]+$/u.test(playerName)) { s.writeHead(400, hdr); return s.end(); }
     const photo = await fetchPlayerPhoto(playerName);
-    if (!photo || photo.status !== 200) { s.writeHead(404, { ...hdr, 'Cache-Control': 'public, max-age=1800' }); return s.end(); }
+    if (!photo || photo.status !== 200) { s.writeHead(404, { ...hdr, 'Cache-Control': 'no-store' }); return s.end(); }
     s.writeHead(200, { ...hdr, 'Content-Type': photo.type, 'Cache-Control': 'public, max-age=604800', 'Content-Length': photo.bytes.length });
     return s.end(photo.bytes);
   }
