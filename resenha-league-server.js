@@ -99,6 +99,21 @@ function connect(ws, req) {
       send(ws,{t:'left'});return;
     }
     if(!currentRoom||!player)return;
+    if(m.t==='simulate-auction' && player.id===currentRoom.host){
+      if(currentRoom.tournament) return fail('O campeonato desta sala já foi criado. Crie uma nova sala para repetir o teste.');
+      const sampleNames=['Resenha FC','Tropa da Bola','Craques United','Lendas do Fut'];
+      const positions=['GOL','ZAG','ZAG','LAT','LAT','VOL','MC','MEI','ATA','ATA','PE'];
+      const teams=sampleNames.map((name,ti)=>({
+        id:'demo-'+(ti+1),name,
+        lineup:positions.map((pos,pi)=>[pos+' '+(pi+1),pos,72+((ti*7+pi*3)%24)])
+      }));
+      const build=require('./resenha-league-tournament.js');
+      currentRoom.tournament=build.createTournament(teams,currentRoom.code+'-demo');
+      currentRoom.phase='championship-ready';
+      currentRoom.testSimulation=true;
+      broadcast(currentRoom);
+      return;
+    }
     if(m.t==='start' && player.id===currentRoom.host){
       if(currentRoom.players.length<2)return fail('Convide pelo menos mais um participante para iniciar.');
       if(currentRoom.auctionCode)return fail('O leilão desta sala já foi preparado.');
