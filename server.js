@@ -259,7 +259,7 @@ function removePlayer(r, id, why) {
 }
 
 // ===== HTTP / WebSocket =====
-const FILES = { '/revisao-craques': 'revisao-craques.html', '/jogos/crava': 'jogos/resenha-palpites.html', '/jogos/resenha-palpites': 'jogos/resenha-palpites.html', '/crava': 'palpites-teste.html', '/palpites-teste': 'palpites-teste.html', '/': 'index.html', '/resenha-ball': 'resenha-ball.html', '/resenha-x': 'resenha-x.html', '/resenha-stop': 'resenha-stop.html', '/jogos/resenha-stop': 'jogos/resenha-stop.html', '/beatball': 'resenha-ball.html', '/leilao': 'leilao.html', '/dado': 'dado.html', '/manager': 'manager.html', '/manager-teste': 'manager-teste.html', '/jogos/leilao-de-futebol': 'jogos/leilao-de-futebol.html', '/jogos/dado-da-copa': 'jogos/dado-da-copa.html', '/jogos/resenha-ball': 'jogos/resenha-ball.html', '/jogos/resenha-x': 'jogos/resenha-x.html', '/jogos/resenha-manager': 'jogos/resenha-manager.html', '/plataforma': 'plataforma.html', '/sobre': 'sobre.html', '/conta': 'conta.html', '/ranking': 'ranking.html', '/ranking/como-funciona': 'ranking-como-funciona.html', '/selecoes': 'selecoes.html', '/dados.js': 'dados.js', '/logo.png': 'logo.png', '/favicon.ico': 'favicon.ico', '/favicon-16x16.png': 'favicon-16x16.png', '/favicon-32x32.png': 'favicon-32x32.png', '/apple-touch-icon.png': 'apple-touch-icon.png', '/android-chrome-192x192.png': 'android-chrome-192x192.png', '/android-chrome-512x512.png': 'android-chrome-512x512.png', '/site.webmanifest': 'site.webmanifest', '/og-image.png': 'og-image.png', '/nav.js': 'nav.js', '/scout': 'resenha-scout.html', '/jogos/resenha-scout': 'jogos/resenha-scout.html' };
+const FILES = { '/resenha-league-teste': 'resenha-league-teste.html', '/revisao-craques': 'revisao-craques.html', '/jogos/crava': 'jogos/resenha-palpites.html', '/jogos/resenha-palpites': 'jogos/resenha-palpites.html', '/crava': 'palpites-teste.html', '/palpites-teste': 'palpites-teste.html', '/': 'index.html', '/resenha-ball': 'resenha-ball.html', '/resenha-x': 'resenha-x.html', '/resenha-stop': 'resenha-stop.html', '/jogos/resenha-stop': 'jogos/resenha-stop.html', '/beatball': 'resenha-ball.html', '/leilao': 'leilao.html', '/dado': 'dado.html', '/manager': 'manager.html', '/manager-teste': 'manager-teste.html', '/jogos/leilao-de-futebol': 'jogos/leilao-de-futebol.html', '/jogos/dado-da-copa': 'jogos/dado-da-copa.html', '/jogos/resenha-ball': 'jogos/resenha-ball.html', '/jogos/resenha-x': 'jogos/resenha-x.html', '/jogos/resenha-manager': 'jogos/resenha-manager.html', '/plataforma': 'plataforma.html', '/sobre': 'sobre.html', '/conta': 'conta.html', '/ranking': 'ranking.html', '/ranking/como-funciona': 'ranking-como-funciona.html', '/selecoes': 'selecoes.html', '/dados.js': 'dados.js', '/logo.png': 'logo.png', '/favicon.ico': 'favicon.ico', '/favicon-16x16.png': 'favicon-16x16.png', '/favicon-32x32.png': 'favicon-32x32.png', '/apple-touch-icon.png': 'apple-touch-icon.png', '/android-chrome-192x192.png': 'android-chrome-192x192.png', '/android-chrome-512x512.png': 'android-chrome-512x512.png', '/site.webmanifest': 'site.webmanifest', '/og-image.png': 'og-image.png', '/nav.js': 'nav.js', '/scout': 'resenha-scout.html', '/jogos/resenha-scout': 'jogos/resenha-scout.html' };
 const SEC = {
   'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(), payment=()',
@@ -833,6 +833,14 @@ const server = http.createServer(async (q, s) => {
       }
     });
     return;
+  }
+  if (pth === '/resenha-league-teste') {
+    hdr['X-Robots-Tag'] = 'noindex, nofollow, noarchive';
+    const password = process.env.LEAGUE_TEST_PASSWORD;
+    if (!password) { s.writeHead(404, hdr); return s.end('Not found'); }
+    const auth = String(q.headers.authorization || '');
+    const supplied = auth.startsWith('Basic ') ? Buffer.from(auth.slice(6), 'base64').toString('utf8').split(':').slice(1).join(':') : '';
+    if (supplied !== password) { s.writeHead(401, { ...hdr, 'WWW-Authenticate': 'Basic realm="Resenha League - testes", charset="UTF-8"', 'Cache-Control': 'no-store' }); return s.end('Acesso restrito ao ambiente de testes.'); }
   }
   if (pth === '/palpites-teste' || pth === '/crava') { hdr['X-Robots-Tag'] = 'noindex, nofollow, noarchive'; }
   if (pth === '/robots.txt') { s.writeHead(200, { ...hdr, 'Content-Type': 'text/plain; charset=utf-8' }); return s.end(`User-agent: *\nAllow: /\nDisallow: /manager-teste\nDisallow: /*?sala=\n\nSitemap: ${site}/sitemap.xml\n`); }
