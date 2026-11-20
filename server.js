@@ -288,7 +288,7 @@ async function fetchPlayerPhoto(name) {
         playerPhotoCache.set(key, miss); return miss;
       }
       const imageUrl = player.strCutout || player.strThumb;
-      if (!/^https:\/\/(www\\.)?thesportsdb\\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
+      if (!/^https:\/\/(www\.)?thesportsdb\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
       const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Imagem HTTP ' + response.status);
       const type = response.headers.get('content-type') || 'image/jpeg';
@@ -315,11 +315,11 @@ const server = http.createServer(async (q, s) => {
   const pth = new URL(q.url, 'http://x').pathname, site = siteOf(q), hdr = { ...SEC };
   if (String(q.headers['x-forwarded-proto'] || '').startsWith('https')) hdr['Strict-Transport-Security'] = 'max-age=31536000';
 
-  const playerPhotoMatch = pth.match(/^\\/player-photo\\/([^/]+)$/);
+  const playerPhotoMatch = pth.match(/^\/player-photo\/([^/]+)$/);
   if (playerPhotoMatch && q.method === 'GET') {
     let playerName = '';
     try { playerName = decodeURIComponent(playerPhotoMatch[1]).slice(0, 80).trim(); } catch (e) {}
-    if (!playerName || !/^[\\p{L}\\p{N} .’'\\-]+$/u.test(playerName)) { s.writeHead(400, hdr); return s.end(); }
+    if (!playerName || !/^[\p{L}\p{N} .’'\-]+$/u.test(playerName)) { s.writeHead(400, hdr); return s.end(); }
     const photo = await fetchPlayerPhoto(playerName);
     if (!photo || photo.status !== 200) { s.writeHead(404, { ...hdr, 'Cache-Control': 'public, max-age=1800' }); return s.end(); }
     s.writeHead(200, { ...hdr, 'Content-Type': photo.type, 'Cache-Control': 'public, max-age=604800', 'Content-Length': photo.bytes.length });
