@@ -288,7 +288,7 @@ async function fetchPlayerPhoto(name) {
         playerPhotoCache.set(key, miss); return miss;
       }
       const imageUrl = player.strCutout || player.strThumb;
-      if (!/^https:\/\/(www\.)?thesportsdb\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
+      if (!/^https:\/\/([a-z0-9-]+\.)*thesportsdb\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
       const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error('Imagem HTTP ' + response.status);
       const type = response.headers.get('content-type') || 'image/jpeg';
