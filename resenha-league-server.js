@@ -30,7 +30,8 @@ function publicRooms() {
 function state(room, player) {
   return { t:'state', room:{ code:room.code, title:room.title, visibility:room.visibility, phase:room.phase,
     host:room.host, players:room.players.map(p=>({id:p.id,name:p.name,on:!!p.ws})), maxPlayers:MAX_PLAYERS },
-    you:player && player.id, isHost:!!(player && player.id===room.host) };
+    you:player && player.id, isHost:!!(player && player.id===room.host),
+    auctionUrl: room.phase === 'auction-ready' && room.auctionCode && player ? '/leilao?sala=' + encodeURIComponent(room.auctionCode) + '&nome=' + encodeURIComponent(player.name) + '&league=1' : null };
 }
 function broadcast(room) {
   room.updatedAt = Date.now();
@@ -39,6 +40,11 @@ function broadcast(room) {
   for (const ws of clients) send(ws, listing);
 }
 const clients = new Set();
+let auctionBridge = null;
+function setAuctionBridge(createRoom) {
+  if (typeof createRoom !== 'function') throw new TypeError('A ponte do leilão precisa ser uma função.');
+  auctionBridge = createRoom;
+}
 function connect(ws, req) {
   if (!authorized(req)) { ws.close(1008, 'Acesso restrito ao laboratório'); return; }
   clients.add(ws);
@@ -84,10 +90,18 @@ function connect(ws, req) {
     if(!currentRoom||!player)return;
     if(m.t==='start' && player.id===currentRoom.host){
       if(currentRoom.players.length<2)return fail('Convide pelo menos mais um participante para iniciar.');
-      currentRoom.phase='auction-ready';broadcast(currentRoom);return;
-    }
-    if(m.t==='back' && player.id===currentRoom.host && currentRoom.phase==='auction-ready'){
-      currentRoom.phase='lobby';broadcast(currentRoom);return;
+      if(currentRoom.auctionCode)return fail('O leilão desta sala já foi preparado.');
+      if(!auctionBridge)return fail('A integração com o leilão ainda não está disponível.');
+      try {
+        const hostPlayer = currentRoom.players.find(p => p.id === currentRoom.host);
+        currentRoom.auctionCode = auctionBridge({ code: currentRoom.code, hostName: hostPlayer && hostPlayer.name || player.name });
+        currentRoom.phase='auction-ready';
+        broadcast(currentRoom);
+      } catch (e) {
+        console.error('[Resenha League] Não foi possível preparar o leilão:', e.message);
+        return fail('Não foi possível preparar o leilão. Tente novamente.');
+      }
+      return;
     }
   });
   ws.on('close',()=>{
@@ -99,4 +113,4 @@ function connect(ws, req) {
     if(!room.players.length)rooms.delete(room.code);else broadcast(room);
   });
 }
-module.exports={connect};
+module.exports={connect,setAuctionBridge};
