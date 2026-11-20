@@ -28,7 +28,8 @@
     .install-app-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 13px;border:1px solid #526d42;border-radius:9px;background:#192718;color:#a8ff3f;font:inherit;font-weight:800;white-space:nowrap;cursor:pointer}
     .install-app-link:hover{background:#24351e;border-color:#a8ff3f}
     @media(max-width:760px){.site-nav .install-app-link{display:flex;width:100%;justify-content:flex-start;padding:12px!important;margin-top:5px;font-size:14px!important}}
-`;\n  document.head.appendChild(mobileStyle);
+`;
+  document.head.appendChild(mobileStyle);
 
   const header = document.querySelector('.site-header');
   const siteNav = header && header.querySelector('.site-nav');
