@@ -1,11 +1,12 @@
 name: Manter Resenha do Fut ativo
 
 on:
-  # Horário de Brasília (UTC-3): todos os dias, das 06:00 às 23:50.
+  # Horário de Brasília (UTC-3): todos os dias, das 06:07 às 23:57.
   # GitHub Actions usa UTC; por isso o período atravessa a meia-noite UTC.
+  # Minutos deslocados para reduzir atrasos nos minutos cheios.
   schedule:
-    - cron: "*/10 9-23 * * *"
-    - cron: "*/10 0-2 * * *"
+    - cron: "7-59/10 9-23 * * *"
+    - cron: "7-59/10 0-2 * * *"
   workflow_dispatch:
 
 permissions:
