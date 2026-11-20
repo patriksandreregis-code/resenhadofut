@@ -279,7 +279,7 @@ async function fetchPlayerPhoto(name) {
   if (playerPhotoPending.has(key)) return playerPhotoPending.get(key);
   const pending = (async () => {
     try {
-      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=' + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
+      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
       if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
       const data = await lookup.json();
       const player = (data.player || []).find(item => photoNameKey(item.strPlayer) === key && (item.strCutout || item.strThumb));
