@@ -40,6 +40,20 @@ const escH = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;
 const DEFAULT_CFG = { budget: 200, size: 9, form: '3-3-2', bidSec: 12, packs: ['atuais', 'lendas'], copa: false, torneio: false, fmt: 48 };
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const send = (ws, m) => ws && ws.readyState === 1 && ws.send(JSON.stringify(m));
+
+// Cria uma sala isolada do laboratório, mas utiliza o mesmo motor de leilão.
+function createLeagueAuctionRoom(leagueRoom) {
+  let code;
+  do { code = 'L' + crypto.randomBytes(3).toString('hex').toUpperCase(); } while (rooms[code]);
+  rooms[code] = {
+    code, players: [], phase: 'lobby', queue: [], lot: null, log: [], chat: [], host: null,
+    timer: null, timers: [], sales: [], copaRes: null, torneio: null, unsold: [], round: 1,
+    warned: {}, banned: [], cfg: { ...DEFAULT_CFG }, testMode: true,
+    expectedHostName: leagueRoom.hostName, touched: Date.now()
+  };
+  return code;
+}
+leagueServer.setAuctionBridge(createLeagueAuctionRoom);
 async function verifyAuctionUser(accessToken) {
   if (!accessToken || !process.env.SUPABASE_URL || !process.env.SUPABASE_PUBLISHABLE_KEY) return null;
   try {
@@ -169,7 +183,7 @@ function save() {
   clearTimeout(saveT);
   saveT = setTimeout(() => {
     try {
-      fs.writeFileSync(FILE, JSON.stringify(Object.values(rooms).map(r => ({ code: r.code, phase: r.phase, host: r.host, cfg: r.cfg, queue: r.queue, lot: r.lot, log: r.log, chat: r.chat,
+      fs.writeFileSync(FILE, JSON.stringify(Object.values(rooms).filter(r => !r.testMode).map(r => ({ code: r.code, phase: r.phase, host: r.host, cfg: r.cfg, queue: r.queue, lot: r.lot, log: r.log, chat: r.chat,
         sales: r.sales, copaRes: r.copaRes, torneio: r.torneio, unsold: r.unsold, round: r.round, warned: r.warned, banned: r.banned, touched: r.touched, players: r.players.map(p => ({ id: p.id, name: p.name, token: p.token, supabaseUserId: p.supabaseUserId || null, hasValidBid: !!p.hasValidBid, budget: p.budget, squad: p.squad })) }))));
     } catch (e) {}
   }, 800);
@@ -210,9 +224,9 @@ function nextLot(r) {
       return void setTimeout(() => r.phase === 'auction' && !r.lot && nextLot(r), 3500 / T);
     }
     r.phase = 'end'; r.lot = null;
-    if (r.players.length >= 2) recordCompletedMatch('leilao', 'leilao:' + r.code).catch(e => console.error('[Resenha Activity] Leilão:', e.message));
+    if (!r.testMode && r.players.length >= 2) recordCompletedMatch('leilao', 'leilao:' + r.code).catch(e => console.error('[Resenha Activity] Leilão:', e.message));
     const w = [...r.players].sort((a, b) => score(b) - score(a) || b.budget - a.budget)[0];
-    if (r.players.filter(p => p.supabaseUserId && p.hasValidBid).length >= 2) awardAuctionXP(r);
+    if (!r.testMode && r.players.filter(p => p.supabaseUserId && p.hasValidBid).length >= 2) awardAuctionXP(r);
     if (r.cfg.copa && SQUADS.length > 8) runCopa(r);
     if (r.cfg.torneio) runTorneio(r);
     return say(r, `Fim do leilão! O melhor time é de ${w ? w.name : '—'}!`, 'sold');
@@ -930,7 +944,8 @@ wss.on('connection', (ws, req) => {
       }
       else if (r.phase !== 'lobby' || r.players.length >= MAX_PLAYERS) { r = null; return err('Sala em andamento ou cheia.'); }
       else { p = { id: Math.random().toString(36).slice(2, 8), name, token: newToken(), supabaseUserId: authUser ? authUser.id : null, hasValidBid: false, ws, budget: r.cfg.budget, squad: [] }; r.players.push(p); }
-      if (!r.host || !r.players.some(x => x.id === r.host)) r.host = p.id;
+      if (r.expectedHostName && p.name.toLowerCase() === r.expectedHostName.toLowerCase()) r.host = p.id;
+      else if (!r.host || !r.players.some(x => x.id === r.host)) r.host = p.id;
       bc(r);
     } else if (!r || !p) return;
     else if (m.t === 'cfg' && p.id === r.host && r.phase === 'lobby') {
