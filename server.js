@@ -46,7 +46,7 @@ function createLeagueAuctionRoom(leagueRoom) {
   let code;
   do { code = 'L' + crypto.randomBytes(3).toString('hex').toUpperCase(); } while (rooms[code]);
   rooms[code] = {
-    code, players: [], phase: 'lobby', queue: [], lot: null, log: [], chat: [], host: null,
+    code, leagueRoomCode: leagueRoom.code, players: [], phase: 'lobby', queue: [], lot: null, log: [], chat: [], host: null,
     timer: null, timers: [], sales: [], copaRes: null, torneio: null, unsold: [], round: 1,
     warned: {}, banned: [], cfg: { ...DEFAULT_CFG }, testMode: true,
     expectedHostName: leagueRoom.hostName, touched: Date.now()
@@ -228,6 +228,10 @@ function nextLot(r) {
     const w = [...r.players].sort((a, b) => score(b) - score(a) || b.budget - a.budget)[0];
     if (!r.testMode && r.players.filter(p => p.supabaseUserId && p.hasValidBid).length >= 2) awardAuctionXP(r);
     if (r.cfg.copa && SQUADS.length > 8) runCopa(r);
+    if (r.testMode && r.leagueRoomCode) {
+      const teams = r.players.filter(p => p.squad.length).map(p => ({ id: p.id, name: p.name, lineup: p.squad.map(x => [x.n, x.pos, x.r]) }));
+      leagueServer.auctionFinished(r.leagueRoomCode, teams);
+    }
     if (r.cfg.torneio) runTorneio(r);
     return say(r, `Fim do leilão! O melhor time é de ${w ? w.name : '—'}!`, 'sold');
   }
