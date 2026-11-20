@@ -206,6 +206,7 @@ const store = { get() { try { return JSON.parse(localStorage.getItem('leilao_s')
 
 const params = new URLSearchParams(location.search);
 const inviteCode = (params.get('sala') || '').toUpperCase();
+const leagueRoomCode = (params.get('leagueRoom') || '').toUpperCase();
 const leagueTest = params.get('league') === '1';
 let leagueCompletionSent = false;
 const leagueCompletionChannel = leagueTest && 'BroadcastChannel' in window ? new BroadcastChannel('resenha-league-flow') : null;
@@ -338,7 +339,7 @@ function render() {
   if (!S) return;
   if (leagueTest && S.phase === 'end' && !leagueCompletionSent) {
     leagueCompletionSent = true;
-    try { leagueCompletionChannel && leagueCompletionChannel.postMessage({ type: 'auction-finished', room: inviteCode }); } catch (e) {}
+    try { leagueCompletionChannel && leagueCompletionChannel.postMessage({ type: 'auction-finished', room: leagueRoomCode }); } catch (e) {}
   }
   $('join').hidden = true; $('joining').hidden = true; clearTimeout(jt); $('game').hidden = false; $('code').textContent = S.code;
   $('vz').textContent = 'Narrador: ' + (voice ? 'ligado' : 'desligado'); $('sz').textContent = 'Som: ' + (sfx ? 'ligado' : 'desligado');

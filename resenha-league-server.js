@@ -31,7 +31,7 @@ function state(room, player) {
   return { t:'state', tournament: room.tournament || null, room:{ code:room.code, title:room.title, visibility:room.visibility, phase:room.phase,
     host:room.host, players:room.players.map(p=>({id:p.id,name:p.name,on:!!p.ws})), maxPlayers:MAX_PLAYERS },
     you:player && player.id, isHost:!!(player && player.id===room.host),
-    auctionUrl: room.phase === 'auction-ready' && room.auctionCode && player ? '/leilao?sala=' + encodeURIComponent(room.auctionCode) + '&nome=' + encodeURIComponent(player.name) + '&league=1' : null };
+    auctionUrl: room.phase === 'auction-ready' && room.auctionCode && player ? '/leilao?sala=' + encodeURIComponent(room.auctionCode) + '&nome=' + encodeURIComponent(player.name) + '&league=1&leagueRoom=' + encodeURIComponent(room.code) : null };
 }
 function broadcast(room) {
   room.updatedAt = Date.now();
