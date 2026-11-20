@@ -259,7 +259,7 @@ function removePlayer(r, id, why) {
 }
 
 // ===== HTTP / WebSocket =====
-const FILES = { '/jogos/crava': 'jogos/resenha-palpites.html', '/jogos/resenha-palpites': 'jogos/resenha-palpites.html', '/crava': 'palpites-teste.html', '/palpites-teste': 'palpites-teste.html', '/': 'index.html', '/resenha-ball': 'resenha-ball.html', '/resenha-x': 'resenha-x.html', '/resenha-stop': 'resenha-stop.html', '/jogos/resenha-stop': 'jogos/resenha-stop.html', '/beatball': 'resenha-ball.html', '/leilao': 'leilao.html', '/dado': 'dado.html', '/manager': 'manager.html', '/manager-teste': 'manager-teste.html', '/jogos/leilao-de-futebol': 'jogos/leilao-de-futebol.html', '/jogos/dado-da-copa': 'jogos/dado-da-copa.html', '/jogos/resenha-ball': 'jogos/resenha-ball.html', '/jogos/resenha-x': 'jogos/resenha-x.html', '/jogos/resenha-manager': 'jogos/resenha-manager.html', '/plataforma': 'plataforma.html', '/sobre': 'sobre.html', '/conta': 'conta.html', '/ranking': 'ranking.html', '/ranking/como-funciona': 'ranking-como-funciona.html', '/selecoes': 'selecoes.html', '/dados.js': 'dados.js', '/logo.png': 'logo.png', '/favicon.ico': 'favicon.ico', '/favicon-16x16.png': 'favicon-16x16.png', '/favicon-32x32.png': 'favicon-32x32.png', '/apple-touch-icon.png': 'apple-touch-icon.png', '/android-chrome-192x192.png': 'android-chrome-192x192.png', '/android-chrome-512x512.png': 'android-chrome-512x512.png', '/site.webmanifest': 'site.webmanifest', '/og-image.png': 'og-image.png', '/nav.js': 'nav.js', '/scout': 'resenha-scout.html', '/jogos/resenha-scout': 'jogos/resenha-scout.html' };
+const FILES = { '/craques': 'craques.html', '/jogos/crava': 'jogos/resenha-palpites.html', '/jogos/resenha-palpites': 'jogos/resenha-palpites.html', '/crava': 'palpites-teste.html', '/palpites-teste': 'palpites-teste.html', '/': 'index.html', '/resenha-ball': 'resenha-ball.html', '/resenha-x': 'resenha-x.html', '/resenha-stop': 'resenha-stop.html', '/jogos/resenha-stop': 'jogos/resenha-stop.html', '/beatball': 'resenha-ball.html', '/leilao': 'leilao.html', '/dado': 'dado.html', '/manager': 'manager.html', '/manager-teste': 'manager-teste.html', '/jogos/leilao-de-futebol': 'jogos/leilao-de-futebol.html', '/jogos/dado-da-copa': 'jogos/dado-da-copa.html', '/jogos/resenha-ball': 'jogos/resenha-ball.html', '/jogos/resenha-x': 'jogos/resenha-x.html', '/jogos/resenha-manager': 'jogos/resenha-manager.html', '/plataforma': 'plataforma.html', '/sobre': 'sobre.html', '/conta': 'conta.html', '/ranking': 'ranking.html', '/ranking/como-funciona': 'ranking-como-funciona.html', '/selecoes': 'selecoes.html', '/dados.js': 'dados.js', '/logo.png': 'logo.png', '/favicon.ico': 'favicon.ico', '/favicon-16x16.png': 'favicon-16x16.png', '/favicon-32x32.png': 'favicon-32x32.png', '/apple-touch-icon.png': 'apple-touch-icon.png', '/android-chrome-192x192.png': 'android-chrome-192x192.png', '/android-chrome-512x512.png': 'android-chrome-512x512.png', '/site.webmanifest': 'site.webmanifest', '/og-image.png': 'og-image.png', '/nav.js': 'nav.js', '/scout': 'resenha-scout.html', '/jogos/resenha-scout': 'jogos/resenha-scout.html' };
 const SEC = {
   'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Frame-Options': 'DENY',
   'Permissions-Policy': 'camera=(), microphone=(self), geolocation=(), payment=()',
@@ -348,6 +348,12 @@ function squadsHtml() { // lista de elencos já pronta no HTML (os buscadores le
 const server = http.createServer(async (q, s) => {
   const pth = new URL(q.url, 'http://x').pathname, site = siteOf(q), hdr = { ...SEC };
   if (String(q.headers['x-forwarded-proto'] || '').startsWith('https')) hdr['Strict-Transport-Security'] = 'max-age=31536000';
+
+  if (pth === '/api/craques' && q.method === 'GET') {
+    const players = POOL.map(([name, pos, rating, era, club, role]) => ({ name, position: pos, rating, era, club: club || null, role: role || null }));
+    s.writeHead(200, { ...hdr, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300' });
+    return s.end(JSON.stringify(players));
+  }
 
   const playerPhotoMatch = pth.match(/^\/player-photo\/([^/]+)$/);
   if (playerPhotoMatch && q.method === 'GET') {
