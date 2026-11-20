@@ -207,6 +207,8 @@ const store = { get() { try { return JSON.parse(localStorage.getItem('leilao_s')
 const params = new URLSearchParams(location.search);
 const inviteCode = (params.get('sala') || '').toUpperCase();
 const leagueTest = params.get('league') === '1';
+let leagueCompletionSent = false;
+const leagueCompletionChannel = leagueTest && 'BroadcastChannel' in window ? new BroadcastChannel('resenha-league-flow') : null;
 const inviteName = (params.get('nome') || '').trim().slice(0, 16);
 $('room').value = inviteCode;
 if (inviteCode) { $('joinCodeBox').hidden = true; $('joinActions').hidden = true; }
@@ -334,6 +336,10 @@ function warnHtml() {
 function playerPhotoUrl(name) { return '/player-photo/' + encodeURIComponent(String(name || '').trim()) + '?v=3'; }
 function render() {
   if (!S) return;
+  if (leagueTest && S.phase === 'end' && !leagueCompletionSent) {
+    leagueCompletionSent = true;
+    try { leagueCompletionChannel && leagueCompletionChannel.postMessage({ type: 'auction-finished', room: inviteCode }); } catch (e) {}
+  }
   $('join').hidden = true; $('joining').hidden = true; clearTimeout(jt); $('game').hidden = false; $('code').textContent = S.code;
   $('vz').textContent = 'Narrador: ' + (voice ? 'ligado' : 'desligado'); $('sz').textContent = 'Som: ' + (sfx ? 'ligado' : 'desligado');
   const me = S.players.find(p => p.id === S.you), isHost = S.you === S.host; let h = '';
@@ -384,6 +390,7 @@ function endHtml(isHost) {
   if (S.copaRes) h += `<h2 style="font-size:1.5rem;margin-top:1rem">Copa do Mundo simulada</h2><table>${S.copaRes.map((c, i) => `<tr><td><b>${i + 1}º ${esc(c.name)}</b><br><span class="${c.champ ? 'ok' : 'mu'}">${c.champ ? '🏆 Campeão do mundo' : 'Eliminado: ' + esc(c.out)}</span></td>
     <td>${c.wins}V · ${c.gf}x${c.ga} gols<details><summary class="mu">jogos</summary>${c.matches.map(m => `<div class="${m.won ? 'ok' : m.draw ? '' : 'bad'}">${esc(m.stage)}: ${esc(m.opp)} ${m.gf}–${m.ga}${m.pen ? ' (pên)' : ''}</div>`).join('')}</details></td></tr>`).join('')}</table>`;
   if (S.torneio) h += torneioHtml();
+  if (leagueTest) h += `<div class="status" style="margin-top:1rem;border:1px solid var(--ac);background:#172719"><b>Leilão concluído!</b><br>O campeonato está sendo preparado na aba do Resenha League. Você será direcionado para lá automaticamente; se necessário, volte à aba anterior.</div>`;
   const hasTeams = S.players.filter(p => p.squad.length).length > 1;
   if (isHost && ((S.copaOk && !S.copaRes) || (hasTeams && !S.torneio))) h += `<p class="row">${S.copaOk && !S.copaRes ? `<button onclick="send({t:'copa'})">🏆 Simular a Copa do Mundo</button>` : ''}${hasTeams && !S.torneio ? `<button onclick="send({t:'torneio'})">⚔️ Torneio entre os times do leilão</button>` : ''}</p>`;
   return h + (isHost ? `<p><button class="pri" onclick="send({t:'again'})">Jogar de novo</button></p>` : '');
