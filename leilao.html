@@ -321,7 +321,7 @@ function warnHtml() {
   return (S.warn || []).map(w => `<div style="padding:.5rem .7rem;border-radius:6px;margin-bottom:.8rem;background:${w.crit ? '#5c1f24' : '#4a3a0c'};border:1px solid ${w.crit ? 'var(--bad)' : 'var(--ac)'}">
     ⚠️ ${w.crit ? 'Faltam' : 'Estão acabando os'} ${{ GK: 'goleiros', DEF: 'defensores', MID: 'meias', ATT: 'atacantes' }[w.pos]}: restam <b>${w.left}</b> para <b>${w.need}</b> vagas${S.round > 1 ? ' (rodada ' + S.round + ')' : ''}.</div>`).join('');
 }
-function playerPhotoUrl(name) { return '/player-photo/' + encodeURIComponent(String(name || '').trim()); }
+function playerPhotoUrl(name) { return '/player-photo/' + encodeURIComponent(String(name || '').trim()) + '?v=2'; }
 function render() {
   if (!S) return;
   $('join').hidden = true; $('joining').hidden = true; clearTimeout(jt); $('game').hidden = false; $('code').textContent = S.code;
