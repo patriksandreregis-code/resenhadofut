@@ -266,6 +266,46 @@ const SEC = {
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://media.api-sports.io https://crests.football-data.org; connect-src 'self' ws: wss: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
 };
 const siteOf = q => SITE_URL || (String(q.headers['x-forwarded-proto'] || 'http').split(',')[0] + '://' + q.headers.host);
+
+// Fotos dos jogadores: consulta sob demanda no TheSportsDB e mantém cache em memória.
+// A busca só aceita correspondência exata do nome para evitar exibir a foto de outro atleta.
+const playerPhotoCache = new Map(), playerPhotoPending = new Map();
+const photoNameKey = value => String(value || '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+async function fetchPlayerPhoto(name) {
+  const key = photoNameKey(name);
+  if (!key) return null;
+  const cached = playerPhotoCache.get(key);
+  if (cached && cached.expires > Date.now()) return cached;
+  if (playerPhotoPending.has(key)) return playerPhotoPending.get(key);
+  const pending = (async () => {
+    try {
+      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/3/searchplayers.php?p=' + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
+      if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
+      const data = await lookup.json();
+      const player = (data.player || []).find(item => photoNameKey(item.strPlayer) === key && (item.strCutout || item.strThumb));
+      if (!player) {
+        const miss = { status: 404, expires: Date.now() + 6 * 3600e3 };
+        playerPhotoCache.set(key, miss); return miss;
+      }
+      const imageUrl = player.strCutout || player.strThumb;
+      if (!/^https:\/\/([a-z0-9-]+\.)*thesportsdb\.com\//i.test(imageUrl)) throw new Error('URL de imagem não permitida');
+      const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
+      if (!response.ok) throw new Error('Imagem HTTP ' + response.status);
+      const type = response.headers.get('content-type') || 'image/jpeg';
+      if (!type.startsWith('image/')) throw new Error('Resposta não é uma imagem');
+      const bytes = Buffer.from(await response.arrayBuffer());
+      if (!bytes.length || bytes.length > 4 * 1024 * 1024) throw new Error('Imagem fora do limite');
+      const result = { status: 200, bytes, type, expires: Date.now() + 7 * 24 * 3600e3 };
+      playerPhotoCache.set(key, result); return result;
+    } catch (error) {
+      console.warn('[Foto jogador] ' + name + ':', error.message);
+      const miss = { status: 404, expires: Date.now() + 30 * 60e3 };
+      playerPhotoCache.set(key, miss); return miss;
+    } finally { playerPhotoPending.delete(key); }
+  })();
+  playerPhotoPending.set(key, pending);
+  return pending;
+}
 function squadsHtml() { // lista de elencos já pronta no HTML (os buscadores leem o texto)
   const g = {}; SQUADS.forEach(x => (g[x.t] = g[x.t] || []).push(x));
   return Object.keys(g).sort((a, b) => a.localeCompare(b, 'pt')).map(n => `<details><summary>${escH(n)} <span>${g[n].map(x => x.y).sort().join(' · ')}</span></summary>` +
@@ -274,6 +314,17 @@ function squadsHtml() { // lista de elencos já pronta no HTML (os buscadores le
 const server = http.createServer(async (q, s) => {
   const pth = new URL(q.url, 'http://x').pathname, site = siteOf(q), hdr = { ...SEC };
   if (String(q.headers['x-forwarded-proto'] || '').startsWith('https')) hdr['Strict-Transport-Security'] = 'max-age=31536000';
+
+  const playerPhotoMatch = pth.match(/^\/player-photo\/([^/]+)$/);
+  if (playerPhotoMatch && q.method === 'GET') {
+    let playerName = '';
+    try { playerName = decodeURIComponent(playerPhotoMatch[1]).slice(0, 80).trim(); } catch (e) {}
+    if (!playerName || !/^[\p{L}\p{N} .’'\-]+$/u.test(playerName)) { s.writeHead(400, hdr); return s.end(); }
+    const photo = await fetchPlayerPhoto(playerName);
+    if (!photo || photo.status !== 200) { s.writeHead(404, { ...hdr, 'Cache-Control': 'public, max-age=1800' }); return s.end(); }
+    s.writeHead(200, { ...hdr, 'Content-Type': photo.type, 'Cache-Control': 'public, max-age=604800', 'Content-Length': photo.bytes.length });
+    return s.end(photo.bytes);
+  }
 
   if (pth === '/api/crava/ranking' && q.method === 'GET') {
     const sendCravaJson = (code, data) => { s.writeHead(code, { ...hdr, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' }); s.end(JSON.stringify(data)); };
