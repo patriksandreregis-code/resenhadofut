@@ -51,7 +51,8 @@ button{border:1px solid #405342;border-radius:9px;background:#1a281d;color:var(-
 <div id="playerList" class="players"></div>
 <div id="roomStatus" class="status">Aguardando participantes…</div>
 <div class="actions" id="hostActions"><button class="primary" id="startBtn">Preparar próxima etapa</button></div>
-<p class="hint">Nesta etapa estamos validando criação, visibilidade, entrada por código e presença dos participantes. O leilão e o campeonato serão conectados nas próximas etapas.</p>
+<div class="actions" id="auctionActions" hidden><button class="primary" id="auctionBtn">Entrar no leilão de jogadores ↗</button></div>
+<p class="hint">O leilão usa os jogadores e as regras do Leilão atual. Esta sala é marcada como teste: não concede XP nem altera o ranking oficial.</p>
 </section>
 <div class="error" id="error" role="status" aria-live="polite"></div>
 </main>
@@ -98,15 +99,17 @@ function renderRoom(){
  $('playerCount').textContent='('+myRoom.players.length+'/'+myRoom.maxPlayers+')';
  $('hostText').textContent=currentState.isHost?'Você é o anfitrião':'Anfitrião: '+(myRoom.players.find(p=>p.id===myRoom.host)||{}).name;
  $('playerList').innerHTML=myRoom.players.map(p=>'<div class="player"><b>'+escapeHtml(p.name)+'</b>'+(p.id===myRoom.host?'<div class="crown">★ ANFITRIÃO</div>':'')+'<div class="muted" style="font-size:11px">'+(p.on?'Conectado':'Reconectando…')+'</div></div>').join('');
- $('hostActions').hidden=!currentState.isHost;
- $('startBtn').textContent=myRoom.phase==='auction-ready'?'Voltar à sala de espera':'Preparar próxima etapa';
- $('roomStatus').textContent=myRoom.phase==='auction-ready'?'Sala confirmada! A próxima entrega conectará este lobby ao leilão de jogadores.':'Compartilhe o código e aguarde seus participantes. O anfitrião poderá preparar a próxima etapa quando houver pelo menos 2 participantes.';
+ const auctionReady=myRoom.phase==='auction-ready';
+ $('hostActions').hidden=!currentState.isHost||auctionReady;
+ $('auctionActions').hidden=!auctionReady||!currentState.auctionUrl;
+ $('roomStatus').textContent=auctionReady?'Leilão preparado! Todos os participantes já podem entrar na sala de montagem dos elencos.':'Compartilhe o código e aguarde seus participantes. O anfitrião poderá preparar o leilão quando houver pelo menos 2 participantes.';
 }
 $('createBtn').onclick=create;
 $('joinBtn').onclick=()=>join();
 $('refreshBtn').onclick=()=>send({t:'list'});
 $('leaveBtn').onclick=()=>send({t:'leave'});
-$('startBtn').onclick=()=>send({t:myRoom&&myRoom.phase==='auction-ready'?'back':'start'});
+$('startBtn').onclick=()=>send({t:'start'});
+$('auctionBtn').onclick=()=>{if(currentState&&currentState.auctionUrl)location.href=currentState.auctionUrl;};
 $('copyBtn').onclick=async()=>{const url=location.origin+'/resenha-league-teste';const txt='Vamos jogar Resenha League! Código: '+myRoom.code+' — '+url;try{await navigator.clipboard.writeText(txt);showError('Convite copiado!');}catch{prompt('Copie o convite:',txt);}};
 $('shareBtn').onclick=()=>{const txt='Vamos jogar Resenha League! Entre no laboratório e use o código '+myRoom.code+': '+location.origin+'/resenha-league-teste';window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');};
 $('joinCode').addEventListener('keydown',e=>{if(e.key==='Enter')join();});
