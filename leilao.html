@@ -50,6 +50,7 @@ a{color:var(--mu)}.mu{color:var(--mu)}.ok{color:var(--ok)}.bad{color:var(--bad)}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem;margin-bottom:1rem}
 .pos{background:var(--ac);color:#241a00;font-weight:700;padding:.1rem .6rem;border-radius:99px;font-size:.85rem}
 .lot h1{font-size:3.4rem;line-height:1;margin:.5rem 0 .2rem}.big{font-size:2.6rem;font-weight:800;color:var(--ac)}
+.lot-hero{display:flex;align-items:center;gap:1.1rem;margin:.9rem 0 1rem}.lot-photo-box{position:relative;flex:0 0 168px;width:168px;height:168px;display:grid;place-items:center;overflow:hidden;border:1px solid #52634e;border-radius:14px;background:radial-gradient(circle at 50% 35%,#344a36,#101713 72%);box-shadow:0 12px 30px #0006}.lot-photo{width:100%;height:100%;object-fit:contain;object-position:center bottom}.photo-fallback{position:absolute;inset:0;display:grid;place-items:center;font:900 4rem 'Barlow Condensed',Impact,sans-serif;color:var(--ac);background:linear-gradient(145deg,#233b27,#101713)}.lot-info{min-width:0}.lot-info h1{overflow-wrap:anywhere}.player-dot{position:relative;width:48px;height:48px;border-radius:50%;margin:0 auto 3px;overflow:hidden;border:2px solid #fff;background:var(--ac);display:grid;place-items:center}.player-mini-photo{width:100%;height:100%;object-fit:cover;object-position:center top}.player-mini-fallback{position:absolute;inset:0;display:grid;place-items:center;color:#241a00;font-weight:900;background:var(--ac)}@media(max-width:480px){.lot-photo-box{flex-basis:124px;width:124px;height:140px}.lot-hero{gap:.75rem}.lot h1{font-size:2.7rem}.player-dot{width:42px;height:42px}}
 .track{height:10px;background:#0b100d;border-radius:99px;overflow:hidden;margin:.8rem 0 .3rem}#bar{height:100%;width:100%}
 .row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-top:.7rem}
 #bidbar input{width:7.5rem}
@@ -320,6 +321,7 @@ function warnHtml() {
   return (S.warn || []).map(w => `<div style="padding:.5rem .7rem;border-radius:6px;margin-bottom:.8rem;background:${w.crit ? '#5c1f24' : '#4a3a0c'};border:1px solid ${w.crit ? 'var(--bad)' : 'var(--ac)'}">
     ⚠️ ${w.crit ? 'Faltam' : 'Estão acabando os'} ${{ GK: 'goleiros', DEF: 'defensores', MID: 'meias', ATT: 'atacantes' }[w.pos]}: restam <b>${w.left}</b> para <b>${w.need}</b> vagas${S.round > 1 ? ' (rodada ' + S.round + ')' : ''}.</div>`).join('');
 }
+function playerPhotoUrl(name) { return '/player-photo/' + encodeURIComponent(String(name || '').trim()); }
 function render() {
   if (!S) return;
   $('join').hidden = true; $('joining').hidden = true; clearTimeout(jt); $('game').hidden = false; $('code').textContent = S.code;
@@ -333,7 +335,8 @@ function render() {
   else if (!S.lot) h = warnHtml() + `<h2 style="font-size:2.2rem">Preparando o próximo jogador…</h2>`;
   else {
     const l = S.lot, can = me.need[l.pos] > 0 && l.bidder !== me.id;
-    h = warnHtml() + `<div class="lot"><span class="pos">${l.role ? esc(ROLE[l.role]) : PN[l.pos]}</span>${l.club ? ` <span class="pos" style="background:#2a5782;color:var(--tx)">${esc(l.club)}</span>` : ''}<h1>${esc(l.n)}</h1><div class="mu">Nota ${l.r}</div>
+    h = warnHtml() + `<div class="lot"><span class="pos">${l.role ? esc(ROLE[l.role]) : PN[l.pos]}</span>${l.club ? ` <span class="pos" style="background:#2a5782;color:var(--tx)">${esc(l.club)}</span>` : ''}
+      <div class="lot-hero"><div class="lot-photo-box"><img class="lot-photo" src="${playerPhotoUrl(l.n)}" alt="Foto de ${esc(l.n)}" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="photo-fallback" style="display:none">${esc(l.n.slice(0,1).toUpperCase())}</span></div><div class="lot-info"><h1>${esc(l.n)}</h1><div class="mu">Nota ${l.r}</div></div></div>
       <div class="big">€ ${l.bidder ? l.bid : l.base}M</div>
       <div>${l.bidder ? `Maior lance: <b>${esc(nm(l.bidder))}</b>` : 'Ninguém deu lance ainda'}</div>
       <div class="track"><div id="bar"></div></div><div id="tm" class="mu"></div>
@@ -387,7 +390,7 @@ function pitch() {
   const id = S.players.some(p => p.id === viewId) ? viewId : S.you, p = S.players.find(x => x.id === id);
   const rows = ['ATT', 'MID', 'DEF', 'GK'].map(pos => { const got = p.squad.filter(x => x.pos === pos);
     return '<div class="fr">' + Array.from({ length: S.slots[pos] }, (_, i) => { const x = got[i];
-      return x ? `<div class="sl" title="${esc(x.n)}${x.club ? ' — ' + esc(ROLE[x.role]) + ', ' + esc(x.club) : ''} · € ${x.price}M"><div class="dot f">${x.r}</div><small>${esc(x.n)}</small></div>` : '<div class="sl"><div class="dot"></div><small>&nbsp;</small></div>'; }).join('') + '</div>'; }).join('');
+      return x ? `<div class="sl" title="${esc(x.n)}${x.club ? ' — ' + esc(ROLE[x.role]) + ', ' + esc(x.club) : ''} · € ${x.price}M"><div class="player-dot"><img class="player-mini-photo" src="${playerPhotoUrl(x.n)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="player-mini-fallback" style="display:none">${x.r}</span></div><small>${esc(x.n)}</small></div>` : '<div class="sl"><div class="dot"></div><small>&nbsp;</small></div>'; }).join('') + '</div>'; }).join('');
   const spent = p.squad.reduce((s, x) => s + x.price, 0), st = (l, v, c = '') => `<div style="flex:1;min-width:5.5rem;background:#0b100d;border-radius:6px;padding:.3rem .5rem"><div class="mu" style="font-size:.75rem">${l}</div><b class="${c}" style="font-size:1.15rem">${v}</b></div>`;
   $('pitch').innerHTML = `<div class="tabs">${S.players.map(q => `<button class="${q.id === id ? 'pri' : ''}" onclick="viewId='${q.id}';render()">${esc(q.name)}</button>`).join('')}</div>
     <div class="row" style="margin:0 0 .6rem;flex-wrap:nowrap">${st('Disponível', '€ ' + p.budget + 'M', 'ok')}${st('Gasto', '€ ' + spent + 'M')}${st('Nota do time', score(p))}${st('Formação', S.cfg.form)}</div>
