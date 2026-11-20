@@ -5,8 +5,8 @@ const MAX_ROOMS = 100;
 const MAX_PLAYERS = 8;
 const ROOM_TTL = 30 * 60 * 1000;
 const send = (ws, data) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(data)); };
-const cleanName = value => String(value || '').trim().replace(/\\s+/g, ' ').slice(0, 16);
-const validName = value => /^[\\p{L}\\p{N}][\\p{L}\\p{N} ._-]{1,15}$/u.test(value);
+const cleanName = value => String(value || '').trim().replace(/\s+/g, ' ').slice(0, 16);
+const validName = value => /^[\p{L}\p{N}][\p{L}\p{N} ._-]{1,15}$/u.test(value);
 const makeCode = () => {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
