@@ -279,20 +279,43 @@ async function fetchPlayerPhoto(name) {
   if (playerPhotoPending.has(key)) return playerPhotoPending.get(key);
   const pending = (async () => {
     try {
-      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(name), { signal: AbortSignal.timeout(6000) });
+      // Para nomes curtos/ambíguos, consulta o nome completo e exige identificação segura.
+      const photoAliases = {
+        saka: { search: 'Bukayo Saka', accepted: ['bukayosaka'] },
+        rivellino: { search: 'Roberto Rivellino', accepted: ['robertorivellino', 'rivelino', 'rivellino'] },
+        zico: { search: 'Arthur Antunes Coimbra', accepted: ['arthurantunescoimbra', 'zico'] },
+        kane: { search: 'Harry Kane', accepted: ['harrykane'] },
+        raya: { search: 'David Raya', accepted: ['davidraya'] },
+        musiala: { search: 'Jamal Musiala', accepted: ['jamalmusiala'] },
+        maradona: { search: 'Diego Maradona', accepted: ['diegomaradona'] },
+        yamal: { search: 'Lamine Yamal', accepted: ['lamineyamal'] }
+      };
+      const alias = photoAliases[key];
+      const searchName = alias ? alias.search : name;
+      const lookup = await fetch('https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=' + encodeURIComponent(searchName), { signal: AbortSignal.timeout(6000) });
       if (!lookup.ok) throw new Error('TheSportsDB HTTP ' + lookup.status);
       const data = await lookup.json();
       const candidates = (data.player || []).filter(item => item.strPlayer && (item.strCutout || item.strThumb));
-      // Prioriza o nome completo. Se o elenco usar apenas um sobrenome/apelido,
-      // aceita a correspondência por palavra somente quando houver um único atleta.
-      let player = candidates.find(item => photoNameKey(item.strPlayer) === key);
-      if (!player) {
-        const wantedTokens = String(name).trim().split(' ').map(photoNameKey).filter(Boolean);
-        const matches = candidates.filter(item => {
-          const playerTokens = String(item.strPlayer).trim().split(' ').map(photoNameKey).filter(Boolean);
-          return wantedTokens.length > 0 && wantedTokens.every(token => playerTokens.includes(token));
+      let player;
+      if (alias) {
+        player = candidates.find(item => {
+          const names = [item.strPlayer, item.strPlayerAlternate || '']
+            .flatMap(value => String(value).split(/[,;|/]/))
+            .map(photoNameKey).filter(Boolean);
+          return names.some(candidate => alias.accepted.includes(candidate));
         });
-        if (matches.length === 1) player = matches[0];
+      } else {
+        // Para os demais nomes, mantém correspondência exata e só aceita sobrenome
+        // quando houver um único atleta possível.
+        player = candidates.find(item => photoNameKey(item.strPlayer) === key);
+        if (!player) {
+          const wantedTokens = String(name).trim().split(' ').map(photoNameKey).filter(Boolean);
+          const matches = candidates.filter(item => {
+            const playerTokens = String(item.strPlayer).trim().split(' ').map(photoNameKey).filter(Boolean);
+            return wantedTokens.length > 0 && wantedTokens.every(token => playerTokens.includes(token));
+          });
+          if (matches.length === 1) player = matches[0];
+        }
       }
       if (!player) {
         const miss = { status: 404, expires: Date.now() + 6 * 3600e3 };
