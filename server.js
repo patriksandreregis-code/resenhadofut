@@ -6,6 +6,7 @@ const POOL = require('./craques.js'), copa = require('./copa.js');
 const beatball = require('./resenha-ball-server.js');
 const chessServer = require('./resenha-chess-server.js');
 const stopServer = require('./resenha-stop-server.js');
+const leagueServer = require('./resenha-league-server.js');
 const { recordCompletedMatch } = require('./activity-counter.js');
 let SQUADS = [];
 try { SQUADS = new Function(fs.readFileSync(path.join(__dirname, 'dados.js'), 'utf8') + ';return SQUADS')(); } catch (e) { console.log('dados.js não carregado:', e.message); }
@@ -841,6 +842,9 @@ const server = http.createServer(async (q, s) => {
     const auth = String(q.headers.authorization || '');
     const supplied = auth.startsWith('Basic ') ? Buffer.from(auth.slice(6), 'base64').toString('utf8').split(':').slice(1).join(':') : '';
     if (supplied !== password) { s.writeHead(401, { ...hdr, 'WWW-Authenticate': 'Basic realm="Resenha League - testes", charset="UTF-8"', 'Cache-Control': 'no-store' }); return s.end('Acesso restrito ao ambiente de testes.'); }
+    const ticket = crypto.createHmac('sha256', password).update('resenha-league-lab-cookie-v1').digest('hex');
+    hdr['Set-Cookie'] = 'league_test_access=' + ticket + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200' + (String(q.headers['x-forwarded-proto'] || '').startsWith('https') ? '; Secure' : '');
+    hdr['Cache-Control'] = 'no-store';
   }
   if (pth === '/palpites-teste' || pth === '/crava') { hdr['X-Robots-Tag'] = 'noindex, nofollow, noarchive'; }
   if (pth === '/robots.txt') { s.writeHead(200, { ...hdr, 'Content-Type': 'text/plain; charset=utf-8' }); return s.end(`User-agent: *\nAllow: /\nDisallow: /manager-teste\nDisallow: /*?sala=\n\nSitemap: ${site}/sitemap.xml\n`); }
@@ -894,6 +898,7 @@ wss.on('connection', (ws, req) => {
   if (wsPath === '/resenha-ball-ws') return beatball.connect(ws);
   if (wsPath === '/resenha-chess-ws') return chessServer.connect(ws);
   if (wsPath === '/resenha-stop-ws') return stopServer.connect(ws);
+  if (wsPath === '/resenha-league-ws') return leagueServer.connect(ws, req);
   const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
   ipConns[ip] = (ipConns[ip] || 0) + 1;
   ws.on('close', () => { ipConns[ip] = Math.max(0, (ipConns[ip] || 1) - 1); });
