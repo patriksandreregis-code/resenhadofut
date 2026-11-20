@@ -61,6 +61,10 @@ button{border:1px solid #405342;border-radius:9px;background:#1a281d;color:var(-
 (()=>{
 const $=id=>document.getElementById(id);
 let ws=null, myRoom=null, myId=null, myName='', currentState=null, reconnectTimer=null;
+let auctionFinishedSignal=false;
+const leagueFlowChannel='BroadcastChannel' in window ? new BroadcastChannel('resenha-league-flow') : null;
+if(leagueFlowChannel) leagueFlowChannel.onmessage=event=>{if(event.data&&event.data.type==='auction-finished'&&myRoom&&event.data.room===myRoom.code){auctionFinishedSignal=true;try{window.focus()}catch{};if(currentState&&currentState.tournament)showChampionship();}};
+function showChampionship(){const target=document.getElementById('tournamentView');if(!target||target.hidden)return;document.getElementById('roomStatus').textContent='Leilão concluído! Os elencos foram enviados e o campeonato está pronto.';target.scrollIntoView({behavior:'smooth',block:'start'});try{window.focus()}catch{}}
 const showError=t=>{$('error').textContent=t||''};
 function connect(){
  if(ws&&ws.readyState<=1)return;
@@ -94,6 +98,7 @@ function join(code){
 }
 function renderTournament(t){
  const box=$('tournamentView');if(!t){box.hidden=true;return;}box.hidden=false;
+ if(auctionFinishedSignal) setTimeout(showChampionship,120);
  $('tournamentSummary').textContent=t.teams.length+' equipes · '+t.rounds.length+' rodadas · '+t.matches.length+' partidas na fase de pontos corridos. Os 4 melhores avançam ao mata-mata.';
  $('standingsBody').innerHTML=t.standings.map((r,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+escapeHtml(r.name)+'</b></td><td>'+r.pts+'</td><td>'+r.j+'</td><td>'+r.v+'</td><td>'+r.e+'</td><td>'+r.d+'</td><td>'+r.sg+'</td></tr>').join('');
  $('fixturesList').innerHTML=t.rounds.map((round,i)=>'<div class="fixture"><div><b>Rodada '+(i+1)+'</b><br><small>'+round.length+' confronto(s)</small></div><div style="text-align:right">'+round.map(id=>{const m=t.matches.find(x=>x.id===id);return '<div>'+escapeHtml(m.homeName)+' <b>×</b> '+escapeHtml(m.awayName)+'</div>';}).join('')+'</div></div>').join('');
