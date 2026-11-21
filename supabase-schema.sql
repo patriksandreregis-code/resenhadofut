@@ -15,7 +15,7 @@ create unique index if not exists profiles_display_name_unique_ci
 create table if not exists public.game_results (
   id bigint generated always as identity primary key,
   user_id uuid not null references public.profiles(id) on delete cascade,
-  game_key text not null check (game_key in ('leilao','dado','resenha_ball')),
+  game_key text not null check (game_key in ('leilao','dado','resenha_ball','resenha_scout','resenha_chess')),
   result_code text not null check (result_code in ('win','draw','loss','completed')),
   external_event_id text not null unique,
   xp_awarded integer not null default 0 check (xp_awarded >= 0),
@@ -32,6 +32,14 @@ create table if not exists public.xp_history (
   source_event_id text not null unique,
   created_at timestamptz not null default now()
 );
+
+-- Atualiza também instalações existentes para aceitar XP do Resenha Scout e Resenha Chess.
+alter table public.game_results drop constraint if exists game_results_game_key_check;
+alter table public.game_results add constraint game_results_game_key_check
+  check (game_key in ('leilao','dado','resenha_ball','resenha_scout','resenha_chess'));
+alter table public.xp_history drop constraint if exists xp_history_game_key_check;
+alter table public.xp_history add constraint xp_history_game_key_check
+  check (game_key in ('leilao','dado','resenha_ball','resenha_scout','resenha_chess'));
 
 alter table public.profiles enable row level security;
 alter table public.game_results enable row level security;
